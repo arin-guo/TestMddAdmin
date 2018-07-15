@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <include file="public:header" />
+    <!-- jqgrid-->
+    <link href="__HPLUS__/css/plugins/jqgrid/ui.jqgrid.css?0820" rel="stylesheet">
+    <!-- tree -->
+    <link href="__HPLUS__/css/plugins/treeview/bootstrap-treeview.css" rel="stylesheet">
+    <style type="text/css">
+   	.tree{min-height: 656px;}
+    </style>
+</head>
+
+<body class="gray-bg">
+    <div class="wrapper wrapper-content animated fadeInRight">
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="ibox ">
+                    <div class="ibox-content">
+                    	<div class="ibox-search-box">
+                    		<h3>主类型</h3>
+                    	</div>
+                    	<p>
+                    		<button type="button" id="add" class="btn btn-white btn-sm btn-outline"><i class="fa fa-plus-square-o"></i>&nbsp;新增</button>
+                    		<button type="button" id="edit" class="btn btn-white btn-sm btn-outline"><i class="fa fa-edit"></i>&nbsp;修改</button>
+                    		<button type="button" id="del" class="btn btn-white btn-sm btn-outline"><i class="fa fa-trash-o"></i>&nbsp;删除</button>
+                    	</p>
+                        <div class="jqGrid_wrapper">
+                            <table id="table_list"></table>
+                            <div id="pager_list"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="ibox ">
+                    <div class="ibox-content">
+                    	<div class="ibox-search-box">
+                    		<h3>子类型</h3>
+                    	</div>
+                    	<p>
+                    		<button type="button" id="addSubType" class="btn btn-white btn-sm btn-outline"><i class="fa fa-plus-square-o"></i>&nbsp;新增</button>
+                    		<button type="button" id="editSubType" class="btn btn-white btn-sm btn-outline"><i class="fa fa-edit"></i>&nbsp;修改</button>
+                    		<button type="button" id="editSeq" class="btn btn-white btn-sm btn-outline"><i class="fa fa-sort-numeric-asc"></i>&nbsp;修改排序</button>
+                    		<button type="button" id="delSubType" class="btn btn-white btn-sm btn-outline"><i class="fa fa-trash-o"></i>&nbsp;删除</button>
+                    	</p>
+                    	<hr/>
+                    	<input type="hidden" id="subtype_id" value="0"/>
+                       	<input type="hidden" id="parent_subcode" value="0"/>
+                       	<input type="hidden" id="parent_name" value="无"/>
+                        <div id="treeview" class="tree"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<!-- 全局js -->
+<include file="public:foot" />
+<!-- jqGrid -->
+<script src="__HPLUS__/js/plugins/jqgrid/i18n/grid.locale-cn.js?0820"></script>
+<script src="__HPLUS__/js/plugins/jqgrid/jquery.jqGrid.min.js?0820"></script>
+<!-- tree -->
+<script src="__HPLUS__/js/plugins/treeview/bootstrap-treeview.js"></script>
+<!-- Page-Level Scripts -->
+<script>
+function getTreeData(rowid){
+	$("#subtype_id").val(0);
+	$("#parent_subcode").val(0);
+	$("#parent_name").val("无");
+	$.ajax({
+		url:"__URL__/getSubTypeAllData?id="+rowid,
+		type:"get",
+		success:function(data){
+			$("#treeview").treeview({
+				levels: 999,
+	   			color: "rgb(103,​ 106,​ 108)",
+	   			showTags: !0,
+	   			data: data,
+	   			onNodeSelected: function(e, o) {
+	       	    	$("#parent_subcode").val(o.subtype_code);
+	       	    	$("#parent_name").val(o.text);
+	       	    	$("#subtype_id").val(o.id);
+	   			},
+	   			onNodeUnselected: function(e, o) {
+	   	    		$("#parent_subcode").val(0);
+	   	    		$("#parent_name").val("无");
+	   	    		$("#subtype_id").val(0);
+	   	    	}
+	   		});
+		}
+	})
+}
+$(document).ready(function () {
+	//初始化
+    $.jgrid.defaults.styleUI = 'Bootstrap';
+    $("#table_list").jqGrid({
+    	url : '__URL__/getAllData',
+    	datatype: "json",
+        height: 580,
+        autowidth: true,
+        shrinkToFit: true,
+        rowNum: 15,
+        rowList: [10, 15, 30, 50],
+        colNames: ['ID', '主类型名称', '创建时间' ],
+        colModel: [ {name : 'id',index : 'id'},
+                    {name : 'type_name',index : 'type_name'},
+                   	{name : 'create_time',index : 'create_time',formatter: 'date',formatoptions: {srcformat:'u',newformat:'Y-m-d H:i:s'}}
+                  ],
+        pager: "#pager_list",
+        viewrecords: true,
+        hidegrid: false,
+        sortname: "seq",
+        onCellSelect: function(rowid) {
+           	if(rowid != null) {
+           		getTreeData(rowid);
+           	}else {
+           		layer.msg("您没有选取数据！");
+           	}
+        }
+    });
+    
+ 	// 设置按钮
+    $("#table_list").jqGrid('navGrid', '#pager_list', {
+        edit: false,
+        add: false,
+        del: false,
+        search: false
+    }, {
+        height: 200,
+        reloadAfterSubmit: true
+    });
+ 	// 添加适配响应
+    $(window).bind('resize', function () {
+        var width = $('.jqGrid_wrapper').width();
+        $('#table_list').setGridWidth(width);
+    });
+ 	
+ 	
+    
+  	//增
+	$("#add").click(function() {
+		layerDialog("新增主类型",'__URL__/add',"90%","60%",true);
+	})
+	
+    //改
+    $("#edit").click(function() {
+    	var id = $("#table_list").jqGrid('getGridParam','selrow');
+    	if(id != null) {
+    		layerDialog("修改主类型",'__URL__/edit?id='+id,"90%","60%",true);
+    	}else {
+    		layer.msg("您没有选取数据！");
+    	}
+    })
+    //删除大类
+    $("#del").click(function() {
+    	var id = $("#table_list").jqGrid('getGridParam','selrow');
+    	if(id != null) {
+    		layer.confirm('确定执行？', function(index){
+				$.ajax({
+					url:"__URL__/logicDel",
+					type:"post",
+					data:{'id':id},
+					success:function(data){
+						if(data.status == 1){
+							layer.msg(data.info);
+							$('#table_list').trigger("reloadGrid");
+						}else{
+							layer.msg(data.info);
+						}
+					}
+				})
+			    layer.close(index);
+			});
+    	}else {
+    		layer.msg("您没有选取数据！");
+    	}
+    })
+    
+    //增（小类）
+	$("#addSubType").click(function() {
+		var id = $("#table_list").jqGrid('getGridParam','selrow');
+		if(id != null) {
+			var parent_subcode = $("#parent_subcode").val();
+			layerDialog("新增子类型",'__URL__/addSubType?id='+id+'&parent_subcode='+parent_subcode+'&parent_name='+$("#parent_name").val(),"90%","60%",true);
+    	}else {
+    		layer.msg("请先点击选择相应的大类！");
+    	}
+	})
+	
+    //改（小类）
+    $("#editSubType").click(function() {
+    	var id = $("#subtype_id").val();
+    	if(id != 0) {
+    		layerDialog("修改子类型",'__URL__/editSubType?id='+id,"90%","60%",true);
+    	}else {
+    		layer.msg("您没有选取数据！");
+    	}
+    })
+    
+    //修改排序（小类）
+    $("#editSeq").click(function() {
+    	var id = $("#table_list").jqGrid('getGridParam','selrow');
+    	if(id != null) {
+    		layerDialog("修改排序",'__URL__/editSeq?id='+id,"90%","90%",true);
+    	}else {
+    		layer.msg("请先点击选择相应的大类！");
+    	}
+    })
+    
+    //删除小类
+    $("#delSubType").click(function() {
+    	var id = $("#subtype_id").val();
+    	if(id != 0) {
+    		layer.confirm('确定执行？', function(index){
+				$.ajax({
+					url:"__URL__/delSubType",
+					type:"post",
+					data:{'id':id},
+					success:function(data){
+						if(data.status == 1){
+							layer.msg(data.info);
+							var id = $("#table_list").jqGrid('getGridParam','selrow');
+							getTreeData(id);
+						}else{
+							layer.msg(data.info);
+						}
+					}
+				})
+			    layer.close(index);
+			});
+    	}else {
+    		layer.msg("您没有选取数据！");
+    	}
+    })
+    
+});
+</script>
+</html>

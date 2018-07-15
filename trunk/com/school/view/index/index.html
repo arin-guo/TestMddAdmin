@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <include file="public:header" />
+</head>
+<body class="fixed-sidebar full-height-layout gray-bg">
+    <div id="wrapper">
+        <!--左侧导航-->
+        <include file="public:menu" />
+        <div id="page-wrapper" class="gray-bg dashbard-1">
+        	<!--右侧部分-->
+            <include file="public:navbar-top" />
+            <include file="public:page-heading" />
+            <!--主要内容-->
+            <div class="row J_mainContent" id="content-main">
+                <iframe class="J_iframe" name="iframe0" width="100%" height="100%" src="<{:Url('Index/main')}>" frameborder="0" data-id="<{:Url('Index/main')}>" seamless></iframe>
+            </div>
+            <!--底部-->
+            <div class="footer">
+			    <div class="pull-right">&copy; 2017-<{:date('Y')}>
+			    </div>
+			</div>
+            <include file="public:foot" />
+            <!-- 手风琴菜单js -->
+			<js href="/static/hplus/js/plugins/metisMenu/jquery.metisMenu.js"></script>
+			<!-- 滚动条插件js -->
+			<js href="/static/hplus/js/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+			<!-- 自定义js -->
+			<js href="/static/hplus/js/hplus.js"></script>
+			<js href="/static/hplus/js/contabs.js" ></script>
+            <include file="public:skin-config" />
+        </div>
+    </div>
+</body>
+</html>

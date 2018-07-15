@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<include file="public:header" />
+<link href="__HPLUS__/css/dialog.css" rel="stylesheet">
+<link href="__HPLUS__/css/plugins/validform/validform.css" rel="stylesheet">
+<style>
+	.form-control{ padding-left:5px;}
+</style>
+  <body>
+	  <div class="wrapper wrapper-content animated fadeInRight">
+		<form role="form" class="form" action="__URL__/insert">
+			<input type="hidden" name="open_time" value="07:00:00" />
+			<input type="hidden" name="close_time" value="17:00:00" />
+			<div class="form-group">
+				<label class="col-sm-2 control-label">学校：</label>
+				<div class="col-sm-10">
+					<select class="form-control" id="schoolSet" datatype="*" name="school_id">
+						<option value=" ">请选择</option>
+						<foreach item="vo" name="vo">
+						<option value="<{$vo.id}>"><{$vo.name}></option>
+						</foreach>
+					</select>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">班级：</label>
+				<div class="col-sm-10">
+					<select class="form-control" name="class_id" id="classSet" datatype="*">
+						<option value=" ">请选择</option>
+					</select>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">设备名称：</label>
+				<div class="col-sm-10">
+					<input type="text" datatype="*" name="title" class="form-control" placeholder="设备名称,如小班-二班的设备">
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">设备号：</label>
+				<div class="col-sm-10">
+					<div class="col-sm-5">
+					<input type="text" datatype="*" name="device_id" id="device_id" class="form-control" placeholder="设备号，请查看设备底部的S/N序列号">
+					</div>
+					<div class="col-sm-5">
+					<input type="text" id="device_code" class="form-control" placeholder="设备验证码，若底部标签中有6位验证码则输入，老设备则不输">
+					</div>
+					<div class="col-sm-2">
+						<button type="button" class="btn btn-w-m btn-success" onClick="getchannelId()" id="btn1">获取通道</button>
+					</div>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">通道号：</label>
+				<div class="col-sm-10">
+					<div class="col-sm-10">
+						<select class="form-control" id="channel_id" datatype="*" name="channel_id">
+							<option value=" ">请选择</option>
+						</select>
+					</div>
+					<div class="col-sm-2">
+						<button type="button" class="btn btn-w-m btn-success" onClick="getLiveInfo()" disabled="disabled" id="btn2">创建直播</button>
+					</div>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">直播信息：</label>
+				<div class="col-sm-10">
+					<input type="text" datatype="*" name="live_photo" class="form-control" placeholder="直播封面" readonly="readonly">
+					<br/>
+					<input type="text" datatype="*" name="live_hls" class="form-control" placeholder="直播地址" readonly="readonly">
+					<br/>
+					<input type="text" datatype="*" name="live_token" class="form-control" placeholder="直播token" readonly="readonly">
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">开启/关闭设备：</label>
+				<div class="col-sm-10">
+					<div class="radio i-checks">
+                        <label><input type="radio" value="1" name="is_on" checked > <i></i> 开启</label>
+                        <label><input type="radio" value="2" name="is_on" > <i></i> 关闭</label>
+                    </div>
+				</div>
+			</div>
+			<div class="clearfix"></div><br/>
+			<div class="clearfix">
+				<button type="submit" id="submit" class="btn btn-success btn-block">提交</button>
+				<button type="reset" id="reset2" class="hidden btn btn-success btn-block">重置</button>
+			</div>
+		</form>
+	  </div>
+  </body>
+<!-- 全局js -->
+<include file="public:foot" />
+<script src="__HPLUS__/js/plugins/validform/Validform_v5.3.2_min.js"></script>
+<script>
+$(function(){
+	 //联动
+    $("#schoolSet").change(function(){
+    	$.post("__URL__/getClassData",{"id":$(this).find("option:selected").val(),type:1},function(json){  
+    		if(json.status == 1){
+    			$("#classSet").html("<option value=' '>请选择</option>");
+    			json = json.data;
+   	            for(var i=0;i<json.length;i++){  
+   	                $("#classSet").append("<option value='"+json[i].id+"'>"+json[i].name+"</option>");  
+   	            }  
+    		}
+        },'json');  
+    })
+    
+	$(".i-checks").iCheck({checkboxClass:"icheckbox_square-green",radioClass:"iradio_square-green",});
+	$("#reset2").click();
+	var index = parent.layer.getFrameIndex(window.name);
+	var form = $(".form").Validform({
+		tiptype:4,
+		ajaxPost:true,
+		callback:function(data){
+			if(data.status == 1) {
+				window.parent.layer.msg(data.info);
+				window.parent.$('#table_list').trigger("reloadGrid");
+				parent.layer.close(index);
+			}else{
+				window.parent.layer.msg(data.info);
+			}
+		}
+	});
+})
+//获取通道
+function getchannelId(){
+	var deviceId = $("#device_id").val();
+	console.log(deviceId);
+	if(deviceId == ""){
+		return layer.msg("设备号不能为空！");
+	}
+	$.ajax({
+		url:"__URL__/bindDevice",
+		type:"post",
+		data:{type:1,deviceId:deviceId,device_code:$("#device_code").val()},
+		success:function(data){
+			if(data.status == 1){
+				data = data.data;
+				for(var i=0;i<data.length;i++){
+					$("#channel_id").html("<option value=' '>请选择</option>");
+					$("#channel_id").append("<option value='"+data[i]+"'>"+data[i]+"</option>");
+				}
+				$("#device_id").attr('readonly','readonly');
+				$("#device_code").attr('readonly','readonly');
+				$("#btn1").attr('disabled',true);
+				$("#btn2").attr('disabled',false);
+				layer.msg("获取成功，已剃除被使用的通道！");
+			}else{
+				layer.msg(data.data);
+			}
+		}
+	})
+}
+//获取直播地址
+function getLiveInfo(){
+	var deviceId = $("#device_id").val();
+	var channelId = $("#channel_id option:selected").val();
+	if(deviceId == "" || channelId == ""){
+		return layer.msg("设备号或通道号不能为空！");
+	}
+	$.ajax({
+		url:"__URL__/bindDevice",
+		type:"post",
+		data:{type:3,deviceId:deviceId,channelId:channelId},
+		success:function(data){
+			if(data.status == 1){
+				$("input[name='live_photo']").val(data.data.coverUrl);
+				$("input[name='live_hls']").val(data.data.hls);
+				$("input[name='live_token']").val(data.data.liveToken);
+				console.log(data);
+			}else{
+				layer.msg(data.data);
+			}
+		}
+	})
+}
+</script>
+</html>

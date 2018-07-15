@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>预览页</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    .iframe-wrap {
+      width: 375px;
+      margin: 0 auto
+    }
+    .page-home-phone {
+      min-width: 350px;
+      display: inline-block;
+      width: 350px;
+      height: 760px;
+      background: url('__HPLUS__/phone.png') no-repeat;
+      background-size: cover;
+      padding: 100px 12px
+    }
+    .page-home-phone iframe {
+      width: 100%;
+      height: 100%;
+      background: #fff;
+    }
+  </style>
+</head>
+<body>
+  <div class="iframe-wrap">
+    <div class="page-home-phone">
+      <iframe id="frame-container" frameborder="0"></iframe>
+    </div>
+  </div>
+  <script>var tp = <{$type}>;
+    var postfix = location.search.split('?preview=')[1] || '';
+    if(tp == 1){var url = "http://admin.mengdd.net/index/Spa/getSpa#/newsdetail/id/<{$id}>/uid/1/type/1";}else{var url = "http://admin.mengdd.net/index/Spa/getSpa#/familytripdetail/id/<{$id}>/uid/1/type/1";}
+    /*if (postfix) {
+      url = 'http://admin.mengdd.net/index/Spa/getSpa#/' + postfix
+    } else {
+      url = 'http://mengdd.net/'
+    }*/
+    document.getElementById('frame-container').src = url;
+  </script>
+</body>
+</html>

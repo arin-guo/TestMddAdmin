@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<include file="public:header" />
+<link href="__HPLUS__/css/dialog.css" rel="stylesheet">
+<link href="__HPLUS__/css/plugins/validform/validform.css" rel="stylesheet">
+<style>
+	.form-control{ padding-left:5px;}
+</style>
+  <body>
+	  <div class="wrapper wrapper-content animated fadeInRight">
+		<form role="form" class="form" action="__URL__/buildClassTeacher">
+			<input type="hidden" name="classes_id" value="<{$id}>">
+			<div class="form-group">
+				<label class="col-sm-2 control-label">
+					<foreach item="tname" name="typename">
+						<if condition="$tname.subtype_code eq 10001"><{$tname.subtype_name}>：</if>
+					</foreach>
+				</label>
+				<div class="col-sm-10">
+					<select name="teacher_id" class="form-control" >
+						<option value="">请选择</option>
+						<foreach item="vo1" name="vo.teacher">
+							<option value="<{$vo1.id}>" <eq name="vo['chk_teacher_id']" value="$vo1['id']">selected</eq>><{$vo1.realname}></option>
+						</foreach>
+					</select>
+				</div>
+			</div>
+			<div class="clearfix"></div>
+			<br/>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">
+					<foreach item="tname" name="typename">
+						<if condition="$tname.subtype_code eq 10003"><{$tname.subtype_name}>：</if>
+					</foreach>
+				</label>
+				<div class="col-sm-10">
+					<select name="subTeacer_id" class="form-control">
+						<option value="">请选择</option>
+						<foreach item="subTeacher" name="vo.subTeacher">
+							<option value="<{$subTeacher.id}>" <eq name="vo['chk_subteacher_id']" value="$subTeacher['id']">selected</eq>><{$subTeacher.realname}></option>
+						</foreach>
+					</select>
+				</div>
+			</div>
+			<div class="clearfix"></div><br/>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">
+					<foreach item="tname" name="typename">
+						<if condition="$tname.subtype_code eq 10002"><{$tname.subtype_name}>：</if>
+					</foreach>
+				</label>
+				<div class="col-sm-10">
+					<select name="aunt_id" class="form-control">
+						<option value="">请选择</option>
+						<foreach item="vo2" name="vo.aunt">
+							<option value="<{$vo2.id}>" <eq name="vo['chk_aunt_id']" value="$vo2['id']">selected</eq>><{$vo2.realname}></option>
+						</foreach>
+					</select>
+				</div>
+			</div>
+			<div class="clearfix"></div><br/>
+			<div class="clearfix">
+				<button type="submit" id="submit" class="btn btn-success btn-block">提交</button>
+				<button type="reset" id="reset2" class="hidden btn btn-success btn-block">重置</button>
+			</div>
+		</form>
+	  </div>
+  </body>
+<!-- 全局js -->
+<include file="public:foot" />
+<script src="__HPLUS__/js/plugins/validform/Validform_v5.3.2_min.js"></script>
+<script src="__HPLUS__/js/jquery.md5.js"></script>
+<script>
+$(function(){
+	
+	$("#reset2").click();
+	var index = parent.layer.getFrameIndex(window.name);
+	var form = $(".form").Validform({
+		tiptype:4,
+		ajaxPost:true,
+		callback:function(data){
+			if(data.status == 1) {
+				window.parent.layer.msg(data.info);
+				window.parent.$('#table_list').trigger("reloadGrid");
+				parent.layer.close(index);
+			}else{
+				window.parent.layer.msg(data.info);
+			}
+		}
+	});
+})
+</script>
+</html>

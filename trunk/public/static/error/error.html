@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title><php>echo getFields('app_title')</php></title>
+    <style type="text/css">
+    body,html{width:100%;height:100%;margin:0 auto}
+	@media screen and (max-width:768px){.error-tips{width:80%}}.content{width:100%}
+	.allDiv{margin:0 auto;padding:0 10%;background-color:#EFEFEF}
+	.error-top{position:relative;display:-webkit-flex;display:flex;-webkit-align-items:flex-end;align-items:flex-end}
+	.error-top>img{}
+	.error-top>a,.error-top>a:hover{position:absolute;right:10px;font-size:14px;color:#4c4c4c;text-decoration:none;cursor:pointer}
+	.error-content{}
+	.error-img{position:relative;margin-top:10%;text-align:center}
+	.error-tips{}
+	.error-text{margin-bottom:170px}
+	.error-content>h1{color:#4c4c4c;font-size:24px;margin:30px 0;padding-left:3%;font-weight:400;text-align:center}
+	.back-timer{font-size:13px;color:#999999;text-align:center;display:block;width:100%}
+	.back-now{background-color:#339999;border:0;width:185px;height:40px;color:white;font-size:14px;margin:50px 0;margin-left:calc(50% - 92px);box-shadow:0 2px 20px #339999;font-weight:300;outline:none}
+    </style>
+</head>
+<body>
+    <div class="content pagerContent" style="background-color: #EFEFEF;height: 100%;padding-top: 30px;">
+        <div class="allDiv">
+            <div style="display: inline-block;width: 100%;height: 100%;">
+                <div class="error-content">
+                    <div class="error-img">
+                        <img class="error-tips" src="/static/error/img/error-tips.png">
+                    </div>
+                    <h1>
+                    	<?php switch ($code) {?>
+				        <?php case 1:?>操作成功：<?php echo(strip_tags($msg));?><?php break;?>
+				        <?php case 0:?>操作失败：<?php echo(strip_tags($msg));?><?php break;?>
+				     	<?php } ?>
+                    </h1>
+                    <span class="back-timer">
+                        <span id="wait"><?php echo($wait); ?></span> 秒后自动返回上一页
+                    </span>
+                    <button class="back-now" onclick="window.location.href='<?php echo($url); ?>'">马上返回</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script type="text/javascript">
+	var wait = document.getElementById('wait');
+	var interval = setInterval(function(){
+		var time = --wait.innerHTML;
+		if(time <= 0) {
+			window.location.href = '<?php echo($url); ?>';
+			clearInterval(interval);
+		};
+	}, 1000);
+</script>
+</html>

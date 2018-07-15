@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<include file="public:header" />
+<link href="__HPLUS__/css/dialog.css" rel="stylesheet">
+<link href="__HPLUS__/css/plugins/validform/validform.css" rel="stylesheet">
+<style>
+	.form-control{ padding-left:5px;}
+</style>
+  <body>
+	  <div class="wrapper wrapper-content">
+	  	<form role="form" class="form" action="__URL__/insert">
+			<input type="hidden" value="<{:session('school_info_id')}>" name="school_id"/>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">年级类型：</label>
+				<div class="col-sm-10">
+					<select name="cats_code" class="form-control" datatype="*">
+						<option value="">请选择</option>
+						<foreach item="cats" name="vo.type">
+							<option value="<{$cats.subtype_code}>"><{$cats.subtype_name}></option>
+						</foreach>
+					</select>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">班级名称：</label>
+				<div class="col-sm-10">
+					<input type="text" datatype="*" name="name" class="form-control" placeholder="班级名称">
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">班主任：</label>
+				<div class="col-sm-10">
+					<select name="teacher_id" class="form-control" ajaxurl="__URL__/checkTeacher?identity=1">
+						<option value="">请选择</option>
+						<foreach item="teacher" name="vo.teacher">
+							<option value="<{$teacher.id}>"><{$teacher.realname}></option>
+						</foreach>
+					</select>
+				</div>
+			</div>
+			<div class="clearfix"></div>
+			<br/>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">保育阿姨（选填）：</label>
+				<div class="col-sm-10">
+					<select name="aunt_id" class="form-control">
+						<option value="">请选择</option>
+						<foreach item="aunt" name="vo.aunt">
+							<option value="<{$aunt.id}>"><{$aunt.realname}></option>
+						</foreach>
+					</select>
+				</div>
+			</div>
+			<div class="clearfix"></div>
+			<br/>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">任课老师（选填）：</label>
+				<div class="col-sm-10">
+					<select name="subTeacer_id" class="form-control">
+						<option value="">请选择</option>
+						<foreach item="subTeacher" name="vo.subTeacher">
+							<option value="<{$subTeacher.id}>"><{$subTeacher.realname}></option>
+						</foreach>
+					</select>
+				</div>
+			</div>
+			<div class="clearfix"></div>
+			<br/>
+			<div class="clearfix">
+				<button type="submit" id="submit" class="btn btn-success btn-block">提交</button>
+				<button type="reset" id="reset2" class="btn btn-success btn-block hidden">重置</button>
+			</div>
+		</form>
+	  </div>
+  </body>
+<!-- 全局js -->
+<include file="public:foot" />
+<script src="__HPLUS__/js/plugins/validform/Validform_v5.3.2_min.js"></script>
+<script>
+$(function(){
+	$("input[name='name']").blur(function(){
+		if($("select[name='cats_code']").val() == ""){
+			layer.msg("请先选择班级类型！");
+			$(this).val("");
+		}
+		//验证班级名称是否已经被选择
+		$.ajax({
+			url:"__URL__/checkClassNo",
+			type:'post',
+			data:{param:$(this).val(),cats_code:$("select[name='cats_code']").val()},
+			success:function(data){
+				if(data.status != 1) {
+					layer.msg("同年级下班级名称不可重复！");
+					$("input[name='name']").val("");
+				}
+			}
+		})
+	})
+	$("#reset2").click();
+	var index = parent.layer.getFrameIndex(window.name);
+	var form = $(".form").Validform({
+		tiptype:4,
+		ajaxPost:true,
+		callback:function(data){
+			if(data.status == 1) {
+				window.parent.layer.msg(data.info);
+				window.parent.$('#table_list').trigger("reloadGrid");
+				parent.layer.close(index);
+			}else{
+				window.parent.layer.msg(data.info);
+			}
+		}
+	});
+})
+</script>
+</html>

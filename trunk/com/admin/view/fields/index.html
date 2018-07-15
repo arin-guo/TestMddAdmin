@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+<include file="public:header" />
+<!-- jqgrid-->
+<link href="__HPLUS__/css/plugins/jqgrid/ui.jqgrid.css?0820" rel="stylesheet">
+</head>
+
+<body class="gray-bg">
+    <div class="wrapper wrapper-content animated fadeInRight">
+    	<div class="row">
+    		<div class="col-sm-12">
+    			<div class="ibox float-e-margins">
+	                <div class="ibox-title">
+	                    <h5>操作必读</h5>
+	                </div>
+	                <div class="ibox-content">
+	                	<div class="alert alert-danger">
+	                		<ul>
+		                        <li>
+		                            <p><strong>如修改后，请手动删除系统缓存以使字段生效！</strong> - 点击右上角小卡车图标</p>
+		                        </li>
+		                        <li>
+		                            <p><strong>系统参数影响网站正常运行，如不确定，请勿修改！</strong> </p>
+		                        </li>
+		                        <li>
+		                            <p><strong>操作不可逆，谨慎操作！</strong></p>
+		                        </li>
+		                    </ul>
+                   	 	</div>
+	                	<p>
+	    					
+			        	</p>
+	                </div>
+	            </div>
+    		</div>
+    	</div>
+        <div class="row">
+        	<foreach item='data' name='data'>
+            <div class="col-sm-12">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <h5><{$data.content}></h5>
+                        <div class="ibox-tools">
+                            <a class="collapse-link">
+                                <i class="fa fa-chevron-up"></i>
+                            </a>
+                            <a class="dropdown-toggle" data-toggle="dropdown" href="tabs_panels.html#">
+                                <i class="fa fa-wrench"></i>
+                            </a>
+                            <ul class="dropdown-menu dropdown-user">
+	                            <li><a href="javascript:layerDialog('添加','__URL__/add?parent_id=<{$data.id}>','80%','510px',true)">新增</a>
+	                            </li>
+                        	</ul>
+                        </div>
+                        
+                    </div>
+                    <div class="ibox-content">
+                        <div class="row">
+                        	<foreach item="sub" name="data.subList">
+                            <div class="col-sm-12">
+	                            <label class="col-sm-2 control-label"><{$sub.content}>：<br/><small style="color:blue;"><{$sub.field}></small></label>
+								<div class="col-sm-8">
+									<if condition="$sub.type eq 1">
+										<input type="text" name="value" class="form-control" value="<{$sub.value}>" readonly="readonly"/>
+									<elseif condition="$sub.type eq 2">
+										<textarea class="form-control" readonly="readonly"><{$sub.value}></textarea>
+										<div class="clearfix"></div>
+                            			<br/>
+									</if>
+								</div>
+								<div class="col-sm-2">
+									<button type="button" onclick="edit(<{$sub.id}>)" class="btn btn-white pull-left">修改</button>
+								</div>
+                            </div>
+                            </foreach>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </foreach>
+        </div>
+	</div>
+</body>
+<!-- 全局js -->
+<include file="public:foot" />
+<script>
+$(document).ready(function () {
+	
+});
+function edit(id){
+	if(id != null) {
+		layerDialog("修改",'__URL__/edit?id='+id,"80%","510px",true);
+	}else {
+		layer.msg("您没有选取数据！");
+	}
+}
+</script>
+</html>

@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html>
+<include file="public:header" />
+<link href="__HPLUS__/css/dialog.css" rel="stylesheet">
+<link href="__HPLUS__/css/plugins/validform/validform.css" rel="stylesheet">
+<link href="__HPLUS__/js/plugins/uploadImg/upload.css" rel="stylesheet">
+<link href="__HPLUS__/js/plugins/fancybox/jquery.fancybox.css" rel="stylesheet">
+<!-- Data picker -->
+<link href="__HPLUS__/css/plugins/datapicker/datepicker3.css" rel="stylesheet">
+<!--dropzone-->
+<link href="__HPLUS__/js/plugins/dropzone/dropzone.css" rel="stylesheet">
+<body>
+  <div class="wrapper wrapper-content">
+	<form role="form" class="form" action="__URL__/insert">
+		<input type="hidden" value="<{:session('school_info_id')}>" name="school_id"/>
+		<div class="form-group">
+            <label class="col-sm-2 control-label">标题：</label>
+            <div class="col-sm-10">
+                <input type="text" datatype="*" name="title" class="form-control" placeholder="输入标题">
+            </div>
+        </div><input type="hidden" name="type" value=<if condition="$fag eq -1">"<{$fag}>"<else />"<{$id}>"</if> />
+        <!-- <div class="form-group">
+			<label class="col-sm-2 control-label">请选择系列：</label>
+			<div class="col-sm-10">
+                <select name="type"><option>请选择</option><volist name="types" id="vo">
+                    <option><{$vo.title}></option></volist>
+                </select>
+			</div>
+		</div>
+        <div class="clearfix"></div>
+        <br> -->
+        <div class="form-group">
+            <label class="col-sm-2 control-label">来自：</label>
+            <div class="col-sm-10">
+                <input type="text" datatype="*" name="source" class="form-control" placeholder="输入出处">
+            </div>
+        </div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">简介：</label>
+			<div class="col-sm-10">
+				<input type="text" name="intro" datatype="*" class="form-control" placeholder="输入简介">
+			</div>
+		</div>
+		<!--<div class="form-group">-->
+			<!--<label class="col-sm-2 control-label">类别：</label>-->
+			<!--<div class="col-sm-10">-->
+				<!--<select name="type" class="form-control" datatype="*">-->
+					<!--<option value="">请选择</option>-->
+					<!--<option value="1">园所新闻</option>-->
+					<!--<option value="2">社会新闻</option>-->
+				<!--</select>-->
+			<!--</div>-->
+		<!--</div>-->
+		<div class="clearfix"></div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">封面图：</label>
+			<div class="col-sm-10">
+				<div class="file-up"  data-num="1">
+					<input id="photo" name="photo" value="" datatype="*" type="hidden" />
+					<section class="file-box">
+						<img src="__HPLUS__/js/plugins/uploadImg/img/choose.png" class="add-img">
+						<button type="button" onclick="doUpload(this)" class="file"></button>
+					</section>
+				</div>
+			</div>
+		</div>
+        <div class="clearfix"></div>
+        <br>
+		<div class="form-group">
+            <label class="col-sm-2 control-label">音乐：</label>
+            <div class="col-sm-10">
+                <div id="inputAudio" class="dropzone" ></div>
+                <div id="preview-template" style="display: none;">
+                    <div class="dz-preview  dz-file-preview">
+                        <div class="dz-image"><img data-dz-thumbnail /></div>
+                        <div class="dz-details">
+                            <div class="dz-filename"><span data-dz-name></span></div>
+                        </div>
+                        <div class="dz-progress"><span class="dz-upload" data-dz-uploadprogress></span></div>
+                        <div class="dz-success-mark"><span>✔</span></div>
+                        <div class="dz-error-mark"><span>✘</span></div>
+                        <div class="dz-error-message"><span data-dz-errormessage></span></div>
+                    </div>
+                </div>
+            </div>
+            <input type="hidden" name="audio" id="audio" value="">
+        </div>
+        <div class="clearfix"></div>
+        <div class="form-group">
+			<label class="col-sm-2 control-label">时间：(自动获取当前时间)</label>
+			<div class="col-sm-10 input-date22range">
+				<div class="col-sm-6">
+					<input type="text" name=""  class="form-control" placeholder="暂不给选择日期" disabled="disabled">
+				</div>
+			</div>
+		</div>
+		<div class="clearfix"></div>
+        <br>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">内容：</label>
+			<div class="col-sm-10">
+				<script id="myEditor" type="text/plain" style="min-height:280px;">
+				</script>
+                <input class="form-control" type="hidden" id="content_input" name="content">
+            </div>
+		</div>
+		<div class="clearfix"></div><br>
+		<div class="clearfix">
+			<button type="submit" id="submit" class="btn btn-success btn-block">提交</button>
+			<button type="reset" id="reset2" class="btn btn-success btn-block hidden">重置</button>
+		</div>
+	</form>
+  </div>
+</body>
+<!-- 全局js -->
+<include file="public:foot" />
+<script src="__HPLUS__/js/plugins/validform/Validform_v5.3.2_min.js"></script>
+<script type="text/javascript" src="__HPLUS__/js/plugins/uploadImg/jquery.upload.js"></script>
+<script src="__HPLUS__/js/plugins/fancybox/jquery.fancybox.js"></script>
+<!-- Data picker -->
+<script src="__HPLUS__/js/plugins/datapicker/bootstrap-datepicker.js"></script>
+<!--Baidu umeditor-->
+<script type="text/javascript" src="__HPLUS__/js/plugins/ueditor/ueditor.config.js"></script>
+<script type="text/javascript" src="__HPLUS__/js/plugins/ueditor/ueditor.all.js"></script>
+<script type="text/javascript" src="__HPLUS__/js/plugins/dropzone/dropzone.js"></script>
+<script>
+//dropzone初始化
+var appElement = document.querySelector('div .inmodal');
+var myDropzone = new Dropzone("#inputAudio", {
+    url: "__URL__/uploadAudio",//文件提交地址
+    method:"post",  //也可用put
+    paramName:"inputAudio", //默认为file
+    maxFiles:1,//一次性上传的文件数量上限
+    maxFilesize: 8, //文件大小，单位：MB
+    acceptedFiles: ".mp3,.wav,.wma,.aac,.mid", //上传的类型
+    addRemoveLinks:true,
+    dictRemoveFile:'删除文件',
+    dictCancelUpload:'取消上传',
+    dictCancelUploadConfirmation:'确定取消上传？',
+    parallelUploads: 1,//一次上传的文件数量
+    previewTemplate: $('#preview-template').html(),//启用默认的样式
+    dictDefaultMessage:'拖动文件至此或者点击上传',
+    dictMaxFilesExceeded: "只能上传1个",
+    dictResponseError: '文件上传失败!',
+    dictInvalidFileType: "文件类型要.mp3,.wav,.wma,.aac,.mid",
+    dictFallbackMessage:"浏览器不受支持",
+    dictFileTooBig:"该文件太大",
+    init:function(){
+        this.on("addedfile", function(file) {
+            //上传文件时触发的事件
+            document.querySelector('div .dz-default').style.display = 'none';
+        });
+        this.on("success",function(file,data){
+            //上传成功触发的事件
+            console.log('ok');
+            $('#audio').attr('value',data.data);
+        });
+        this.on("error",function (file,data) {
+            //上传失败触发的事件
+            console.log('fail');
+            var message = '';
+            //对于ajax请求，JSON 响应会发送一个 422 HTTP 状态码，
+            //对应file.accepted的值是false，在这里捕捉表单验证的错误提示
+            if (file.accepted){
+                $.each(data,function (key,val) {
+                    message = message + val[0] + ';';
+                })
+                //控制器层面的错误提示，file.accepted = true的时候；
+                alert(message);
+            }
+        });
+        this.on("removedfile",function(file){
+            //删除文件时触发的方法
+            var audioaddress = $('#audio').attr('value');
+            if (audioaddress){
+                $.post('__URL__/deleteAudio',{'audioaddress':audioaddress},function (data) {
+                    console.log('ok');
+                })
+            }
+            $('#audio').removeAttr('value');
+            document.querySelector('div .dz-default').style.display = 'block';
+        });
+    }
+});    
+$(document).ready(function () {
+    //大图展示
+    $(".fancybox").fancybox({openEffect:"none",closeEffect:"none"});
+    //图片回显
+    var imgSrc = $(".file-up").find("input[type='hidden']").val();
+    if(imgSrc != ""){
+        imgSrc = imgSrc.split("|");
+        for(var i = 0;i < imgSrc.length;i++){
+            $.appendImg($(".file-up").find("button"),imgSrc[i]);
+        }
+        //图片独立服务器追加表头
+        $(".file-box a.fancybox").each(function(){
+            var href = "__IMGROOT__"+$(this).attr("href");
+            console.log(href);
+            $(this).attr("href",href);
+        })
+        $(".file-box img.up-img").each(function(){
+            var src = "__IMGROOT__"+$(this).attr("src");
+            console.log(src);
+            $(this).attr("src",src);
+        })
+    }
+})
+$(function(){
+    //Data picker
+    $('.input-daterange').datepicker({
+        keyboardNavigation: false,
+        forceParse: false,
+        autoclose: true,
+        todayHighlight: true,
+        todayBtn:true
+    });
+    var um = UE.getEditor('myEditor',{
+        initialFrameHeight:300,//设置编辑器高度
+        scaleEnabled:true//设置不自动调整高度
+        //scaleEnabled {Boolean} [默认值：false]//是否可以拉伸长高，(设置true开启时，自动长高失效)
+    });
+    UE.Editor.prototype._bkGetActionUrl = UE.Editor.prototype.getActionUrl;
+    UE.Editor.prototype.getActionUrl = function(action) {
+        if (action == 'uploadimage' || action == 'uploadscrawl' || action == 'uploadimage') {
+            return '__URL__/uploadImg';
+        } else if (action == 'uploadvideo') {
+            return '#';
+        } else {
+            return this._bkGetActionUrl.call(this, action);
+        }
+    }
+    var index = parent.layer.getFrameIndex(window.name);
+    var form = $(".form").Validform({
+        tiptype:4,
+        ajaxPost:true,
+        beforeSubmit:function(){
+            var html = um.getContent();
+            $("#content_input").attr('value',html);
+        },
+        callback:function(data){
+            if(data.status == 1) {
+                window.parent.layer.msg(data.info);
+                window.parent.$('#table_list').trigger("reloadGrid");
+                parent.layer.close(index);
+            }else{
+                window.parent.layer.msg(data.info);
+            }
+        }
+    });
+    $("#reset2").click();
+})
+function doUpload(t) {
+    $.upload({
+        url: '__URL__/uploadImgHead',
+        fileName: 'image',
+        dataType: 'json',
+        acceptType:'image/jpeg,image/png',
+        onSend: function() {
+            return true;
+        },
+        // 上传之后回调
+        onComplate: function(data) {
+            if(data.status == 1){
+                var url =data.data;
+                $.appendImg(t,url);
+                //图片独立服务器追加表头
+                $(".file-box a.fancybox").each(function(){
+                    var href = "__IMGROOT__"+$(this).attr("href");
+                    $(this).attr("href",href);
+                });
+                $(".file-box img.up-img").each(function(){
+                    var src = "__IMGROOT__"+$(this).attr("src");
+                    $(this).attr("src",src);
+                })
+            }else{
+                layer.alert(data.info);
+            }
+        }
+    });
+}
+</script>
+</html>

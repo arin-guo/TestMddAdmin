@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<include file="public:header" />
+<link href="__HPLUS__/css/dialog.css" rel="stylesheet">
+<link href="__HPLUS__/css/plugins/validform/validform.css" rel="stylesheet">
+<style>
+	.form-control{ padding-left:5px;}
+</style>
+  <body>
+	  <div class="wrapper wrapper-content animated fadeInRight">
+		<form role="form" class="form" action="__URL__/updateCamera">
+			<input type="hidden" name="id" value="<{$vo.id}>">
+			<input type="hidden" name="class_id" value="<{$id}>">
+			<div class="form-group">
+				<label class="col-sm-2 control-label">设备名称：</label>
+				<div class="col-sm-10">
+					<input type="text" class="form-control" placeholder="设备名称" value="<{$vo.title|default='该班级未绑定设备'}>" readonly="readonly">
+				</div>
+			</div>
+			<div class="clearfix"></div><br/>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">开启/关闭时间：</label>
+				<div class="col-sm-10">
+					<input type="hidden" name="open_time" id="open_time" value="<{$vo.open_time}>" />
+					<input type="hidden" name="close_time" id="close_time" value="<{$vo.close_time}>" />
+					<input type="text" datatype="*" id="laydate" class="form-control" placeholder="开启/关闭时间">
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">开启/关闭声音：</label>
+				<div class="col-sm-10">
+					<div class="radio i-checks">
+                        <label><input type="radio" value="1" name="is_voice" <eq name="$vo.is_voice" value="1">checked</eq>> <i></i> 开启</label>
+                        <label><input type="radio" value="2" name="is_voice" <eq name="$vo.is_voice" value="2">checked</eq>> <i></i> 关闭</label>
+                    </div>
+				</div>
+			</div>
+			<div class="clearfix"></div><br/>
+			<empty name="$vo.title"><p style="color: red;">该班级暂未绑定设备，如有疑问，请联系我们！</p></empty>
+			<div class="clearfix">
+				<button type="submit" id="submit" class="btn btn-success btn-block" <empty name="$vo.title">disabled="disabled"</empty>>提交</button>
+				<button type="reset" id="reset2" class="hidden btn btn-success btn-block">重置</button>
+			</div>
+		</form>
+	  </div>
+  </body>
+<!-- 全局js -->
+<include file="public:foot" />
+<script src="__HPLUS__/js/plugins/validform/Validform_v5.3.2_min.js"></script>
+<script src="__HPLUS__/js/jquery.md5.js"></script>
+<!-- Data picker -->
+<script src="__HPLUS__/js/plugins/layer/laydate/laydate.js"></script>
+<script>
+$(function(){
+	$(".i-checks").iCheck({checkboxClass:"icheckbox_square-green",radioClass:"iradio_square-green",});
+	//执行一个laydate实例
+	laydate.render({
+		elem: '#laydate',
+		type: 'time',
+		theme: '#1c84c6',
+		format: 'HH:mm:ss',
+		min: '08:00:00',
+		max: '20:00:00',
+		value: '<{$vo.open_time|default="08:00:00"}> - <{$vo.close_time|default="20:00:00"}>',
+		range: true
+	});
+	  
+	$("#reset2").click();
+	var index = parent.layer.getFrameIndex(window.name);
+	var form = $(".form").Validform({
+		tiptype:4,
+		ajaxPost:true,
+		beforeSubmit:function(){
+			var time = $("#laydate").val();
+			var timeArr = time.split('-');
+			$("#open_time").val(timeArr[0]);
+			$("#close_time").val(timeArr[1]);
+		},
+		callback:function(data){
+			if(data.status == 1) {
+				window.parent.layer.msg(data.info);
+				window.parent.$('#table_list').trigger("reloadGrid");
+				parent.layer.close(index);
+			}else{
+				window.parent.layer.msg(data.info);
+			}
+		}
+	});
+})
+</script>
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<include file="public:header" />
+<link href="__HPLUS__/css/dialog.css" rel="stylesheet">
+<link href="__HPLUS__/css/plugins/validform/validform.css" rel="stylesheet">
+<style>
+.form-control{ padding-left: 5px; }
+.city-selector { margin-bottom: 10px; }
+.city-selector .is-hide { display: none; }
+.city-selector .el-cascader { width: 320px; }
+</style>
+  <body>
+	  <div class="wrapper wrapper-content animated fadeInRight" id="app">
+		<form role="form" class="form" action="__URL__/insert">
+			<input type="hidden" name="is_lock" value="1">
+			<input type="hidden" name="flag" value="1">
+			<input type="hidden" name="password" id="pwd" value="">
+			<div class="form-group">
+				<label class="col-sm-2 control-label">学校名称：</label>
+				<div class="col-sm-10">
+					<input type="text" datatype="*" name="name" class="form-control" placeholder="学校名称" ajaxurl="__URL__/checkValue4">
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">识别码：</label>
+				<div class="col-sm-10">
+					<input type="text" datatype="*6-6" name="unique_code" errormsg="识别码为唯一不重复6位数字！" class="form-control" placeholder="识别码" ajaxurl="__URL__/checkValue">
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">地址：</label>
+				<div class="col-sm-10">
+					<div class="city-selector">
+						<input name="place_code" type="text" class="is-hide" v-model="selectCity">
+						<el-cascader
+						  :options="options"
+						  :props="props"
+						  v-model="selectCity"
+						></el-cascader>
+					</div>
+					<input type="text" name="address" class="form-control col-sm-4" placeholder="街道地址">
+				</div>
+			</div>
+			<div class="clearfix"></div>
+			<br/>
+			<div class="clearfix">
+				<button type="submit" id="submit" class="btn btn-success btn-block">提交</button>
+				<button type="reset" id="reset2" class="hidden btn btn-success btn-block">重置</button>
+			</div>
+		</form>
+	  </div>
+  </body>
+<!-- 全局js -->
+<include file="public:foot" />
+<script src="__HPLUS__/js/plugins/validform/Validform_v5.3.2_min.js"></script>
+<script src="__HPLUS__/js/jquery.md5.js"></script>
+
+<script>
+var areaData = <{$placeinfo}>;
+$(function(){
+	new Vue({
+	  el: "#app",
+	  data: function() {
+	    return { 
+	    	visible: false,
+	    	options: [],
+	    	selectCity: [],
+	    	props: {
+	    		value: "id",
+	    		label: "name"
+	    	}
+	    }
+	  },
+	  created: function() {
+	  	this.options = areaData;
+	  }
+	});
+	$("#reset2").click();
+	var index = parent.layer.getFrameIndex(window.name);
+	var form = $(".form").Validform({
+		tiptype:4,
+		ajaxPost:true,
+		callback:function(data){
+			if(data.status == 1) {
+				window.parent.layer.msg(data.info);
+				window.parent.$('#table_list').trigger("reloadGrid");
+				parent.layer.close(index);
+			}else{
+				window.parent.layer.msg(data.info);
+			}
+		}
+	});
+})
+</script>
+</html>

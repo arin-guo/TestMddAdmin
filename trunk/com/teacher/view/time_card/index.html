@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+<include file="public:header" />
+<!-- jqgrid-->
+<link href="__HPLUS__/css/plugins/jqgrid/ui.jqgrid.css?0820" rel="stylesheet">
+<link href="__HPLUS__/js/plugins/fancybox/jquery.fancybox.css" rel="stylesheet">
+<!-- Data picker -->
+<link href="__HPLUS__/css/plugins/datapicker/datepicker3.css" rel="stylesheet">
+</head>
+
+<body class="gray-bg">
+    <div class="wrapper wrapper-content animated fadeInRight">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="ibox ">
+                    <div class="ibox-content">
+                    	<div class="ibox-search-box">
+                    		<div class="row">
+                                <input type="hidden" name="class_id" value="<{$class_id}>">
+                    			<div class="infont col-md-2">
+                                    <input type="text" name="realname" class="form-control" placeholder="学生姓名">
+                                </div>
+                                <div class="infont col-md-2">
+                                    <input type="text" name="parent_name" class="form-control" placeholder="家长姓名">
+                                </div>
+                                <div class="infont col-md-2 input-daterange">
+				               		<input type="text" name="day_time" class="form-control" value="<{:date('Y-m-d')}>" readonly="readonly" placeholder="请选择日期">
+								</div>
+								<div class="infont col-md-2">
+		                    		<select name="in_status" class="form-control"  placeholder="上学状态">
+		                    			<option value=" ">请选择</option>
+										<option value="1">正常</option>
+										<option value="-1">迟到</option>
+										<option value="2">请假</option>
+									</select>
+								</div>
+								<div class="infont col-md-2">
+		                    		<select name="out_status" class="form-control"  placeholder="放学状态">
+		                    			<option value=" ">请选择</option>
+										<option value="1">正常</option>
+										<option value="-1">早退</option>
+										<option value="2">请假</option>
+									</select>
+								</div>
+								<div class="infont col-md-2">
+	                    			<button class="btn btn-success btn-block btn-ibox-search" type="button">搜索</button>
+	                    		</div>
+                    		</div>
+                    	</div>
+                    	<p>
+                    	</p>
+                        <div class="jqGrid_wrapper">
+                            <table id="table_list"></table>
+                            <div id="pager_list"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<!-- 全局js -->
+<include file="public:foot" />
+<!-- jqGrid -->
+<script src="__HPLUS__/js/plugins/jqgrid/i18n/grid.locale-cn.js?0820"></script>
+<script src="__HPLUS__/js/plugins/jqgrid/jquery.jqGrid.min.js?0820"></script>
+<script src="__HPLUS__/js/plugins/fancybox/jquery.fancybox.js"></script>
+<!-- Data picker -->
+<script src="__HPLUS__/js/plugins/datapicker/bootstrap-datepicker.js"></script>
+<!-- Page-Level Scripts -->
+<script>
+$(document).ready(function () {
+	//Data picker
+    $('.input-daterange').datepicker({
+        keyboardNavigation: false,
+        forceParse: false,
+        autoclose: true,
+        todayHighlight: true
+    });
+	//图片全屏加载
+	$(".fancybox").fancybox({openEffect:"none",closeEffect:"none"});
+	var params = "?";
+	params += "class_id" + "=" + $("input[name=class_id]").val();
+	params += "&day_time" + "=" + $("input[name=day_time]").val();
+	//初始化
+    $.jgrid.defaults.styleUI = 'Bootstrap';
+    $("#table_list").jqGrid({
+    	url : '__URL__/getAllData' + params,
+    	datatype: "json",
+        height: 580,
+        autowidth: true,
+        shrinkToFit: true,
+        rowNum: 15,
+        rowList: [10, 15, 30, 50],
+        colNames: ['ID','姓名','家长姓名','记录时间','上学状态','放学状态','操作'],
+        colModel: [ {name : 'id',index : 'id',hidden:true},
+                    {name : 'realname',index : 'realname'},
+                    {name : 'parent_name',index : 'parent_name'},
+                    {name : 'day_time',index : 'day_time'},
+                    {name : 'in_status',index : 'in_status',formatter : function(cellvalue, options, rowObject){
+                        var content = "";
+                        switch(cellvalue){
+                        case 1:
+                        	content = '<font color="green">正常</font>'
+                        	break;
+                        case -1:
+                        	content = '<font color="red">迟到</font>'
+                        	break;
+                        case 2:
+                        	content = '<font color="blue">请假</font>'
+                        	break;
+						default:
+							content = '状态异常'
+                        }
+                       return content;
+                   	}},
+                   	{name : 'out_status',index : 'out_status',formatter : function(cellvalue, options, rowObject){
+                        var content = "";
+                        switch(cellvalue){
+                        case 1:
+                        	content = '<font color="green">正常</font>'
+                        	break;
+                        case -1:
+                        	content = '<font color="red">早退</font>'
+                        	break;
+                        case 2:
+                        	content = '<font color="blue">请假</font>'
+                        	break;
+                        default:
+                            content = '状态异常'
+                        }
+                       return content;
+                   	}},
+                   	{name : 'flag',index : 'flag',formatter : function(cellvalue, options, rowObject){
+                        var content ="";
+                        content = '<button class="btn btn-primary btn-xs btn-outline" onclick="detail('+rowObject.id+')"><i class="fa fa-building"></i>  详情</button>';
+                        return content;
+                    },sortable:false}
+        		],
+        pager: "#pager_list",
+        viewrecords: true,
+        hidegrid: false,
+        sortname: "id",
+        sortorder: "desc",
+        ondblClickRow: function(rowid) {
+        	if(rowid != null) {
+        		layerDialog("详细",'__URL__/detailView?id='+rowid,"90%","90%",true);
+        	}else {
+        		layer.msg("您没有选取数据！");
+        	}
+        }
+    });
+
+ 	// 设置按钮
+    $("#table_list").jqGrid('navGrid', '#pager_list', {
+        edit: false,
+        add: false,
+        del: false,
+        search: false
+    }, {
+        height: 200,
+        reloadAfterSubmit: true
+    })
+    /* .navButtonAdd('#pager_list',{
+        caption:"导出excel", 
+        title:"导出excel",
+        buttonicon:"fa fa-file-excel-o",   
+        onClickButton: function(){   
+            layerDialog("导出家长信息",'__URL__/export?id=',"80%","75%",true);
+        },
+        position:"last"  
+    }); */
+    // 添加适配响应
+    $(window).bind('resize', function () {
+        var width = $('.jqGrid_wrapper').width();
+        $('#table_list').setGridWidth(width);
+    });
+  	//搜索
+    $(".btn-ibox-search").click(function() {
+    	result = getSearchParamByInput();
+    	$("#table_list").jqGrid('setGridParam', {
+    		page: 1,
+    		url : '__URL__/getAllData' + result
+    	}).trigger("reloadGrid");
+    })
+    //监控回车
+    $(".ibox-search-box").find(":input").keydown(function(event) {
+		if(event.keyCode == 13){
+			$(".btn-ibox-search").trigger("click");
+		}
+	})
+    //获取搜索条件（仅限封装简单条件）
+    function getSearchParamByInput() {
+    	var result = "";
+    	$(".ibox-search-box").find(":input").each(function() {
+    		if($(this).val() != "") {
+    			if(result != "") {
+    				result += "&";
+    			}else{
+    				result += "?";
+    			}
+    			result += $(this).attr("name") + "=" + $(this).val();
+    		}
+    	})
+    	return result;
+    }
+    
+});
+function detail(id){
+	layerDialog("详细","__URL__/detailView?id="+id,"90%","90%",true)
+}
+</script>
+</html>

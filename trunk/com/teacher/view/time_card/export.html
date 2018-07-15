@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<include file="Public:header" />
+<link href="__HPLUS__/css/dialog.css" rel="stylesheet">
+<link href="__HPLUS__/css/plugins/validform/validform.css" rel="stylesheet">
+<!-- Data picker -->
+<link href="__HPLUS__/css/plugins/datapicker/datepicker3.css" rel="stylesheet">
+<style>
+.form-control{ padding-left:5px;}
+</style>
+<style>
+</style>
+<body class="gray-bg">
+	<div class="wrapper wrapper-content animated fadeInRight">
+		<form role="form" class="form" action="__URL__/exportExcel">
+			<input type="hidden" name="flag" value="1">
+			<div class="form-group">
+				<label class="col-sm-2 control-label">状态：</label>
+				<div class="col-sm-10">
+					<select name="status" class="form-control" datatype="*">
+						<option value="">请选择</option>
+						<option value="1" selected>正常</option>
+						<option value="-1">毕业</option>
+						<option value="-2">转学</option>
+					</select>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">创建时间：</label>
+				<div class="col-sm-10 input-daterange">
+					<div class="col-sm-6">
+	               		<input type="text" name="create_time_begin" class="form-control" readonly="readonly" value="" placeholder="创建时间(开始)">
+					</div>
+					<div class="col-sm-6">
+		       			<input type="text" name="create_time_end" class="form-control" readonly="readonly" value="<{:date('Y-m-d')}>" placeholder="创建时间(结束)">
+					</div>
+				</div>
+			</div>
+			<div class="clearfix"></div>
+			<br/>
+			<div class="clearfix">
+				<button type="submit" id="submit" class="btn btn-success btn-block">导出EXCEL</button>
+				<button type="reset" id="reset2" class="hidden btn btn-success btn-block">重置</button>
+			</div>
+		</form>
+	</div>
+</body>
+<!-- 全局js -->
+<include file="Public:foot" />
+<script src="__HPLUS__/js/plugins/validform/Validform_v5.3.2_min.js"></script>
+<!-- Data picker -->
+<script src="__HPLUS__/js/plugins/datapicker/bootstrap-datepicker.js"></script>
+<script>
+$(function(){
+	//Data picker
+    $('.input-daterange').datepicker({
+        keyboardNavigation: false,
+        forceParse: false,
+        autoclose: true,
+        todayHighlight: true
+    });
+	
+	$("#reset2").click();
+	var index = parent.layer.getFrameIndex(window.name);
+	var form = $(".form").Validform({
+		tiptype:4,
+		ajaxPost:true,
+		beforeSubmit:function(curform){
+			$("#pwd").val($.md5($(".pwd").val()));
+			var groups = "";
+			$(".group:checked").each(function(index){
+				if(index ==0) {
+					groups += $(this).val();
+				}else{
+					groups += "," + $(this).val();
+				}
+			})
+			$("#groups").val(groups);
+		},
+		callback:function(data){
+			if(data.status == 1) {
+				window.parent.layer.msg(data.info);
+				window.parent.$('#table_list').trigger("reloadGrid");
+				parent.layer.close(index);
+			}else{
+				window.parent.layer.msg(data.info);
+			}
+		}
+	});
+})
+</script>
+</html>

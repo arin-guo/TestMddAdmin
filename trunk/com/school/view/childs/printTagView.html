@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<include file="/public/header" />
+<link href="__HPLUS__/css/dialog.css" rel="stylesheet">
+<style>
+	.wrapper{padding-top: 0;}
+</style>
+<body class="gray-bg">
+	<div class="wrapper wrapper-content">
+		<div class="row">
+			<div class="col-sm-12">
+				<div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <h5>打印 </h5>
+                        <div class="ibox-tools">
+                        	<input type="hidden" value="<{$ids}>" id="ids" />
+                        	<a class="collapse-link">
+                                <i class="fa fa-chevron-up"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="ibox-content text-center css-animation-box" id="printContainer" >
+                    	<table class="table table-bordered">
+                   			<tr>
+								<th colspan="8" class="text-center">学生基本信息</th>
+							</tr>
+                   			<tr>
+                   				<td>学生姓名</td>
+                   				<td><{$vo.realname}></td>
+                   				<td>性别</td>
+                   				<td><{$vo.sex == 1?"男":"女"}></td>
+								<td>年龄</td>
+								<td><{$vo.age}></td>
+                   				<td>生日</td>
+                   				<td><{$vo.birthday}></td>
+                   			</tr>
+                   			<tr>
+                   				<td>英文名</td>
+                   				<td><{$vo.en_name}></td>
+								<td>民族</td>
+								<td><{$vo.ethnicity}>
+                   				<td>户籍</td>
+                   				<td colspan="3"><{$vo.household}></td>
+
+                   			</tr>
+                   			<tr>
+                   				<td>家庭住址</td>
+                				<volist name="pinfo" id="data">
+                					<if condition="$data.zid eq 0">
+                						<td colspan="7"><{$data.address}></td>
+                					</if>
+                				</volist>
+                   			</tr>
+                   			<tr>
+                   				<td>过敏情况</td>
+                   				<td colspan="7"><{$vo.allergy_situation}></td>
+                   			</tr>
+                   			<tr>
+                   				<td>身体特殊情况</td>
+                   				<td colspan="7"><{$vo.body_situation}></td>
+                   			</tr>
+                   			<tr>
+                   				<td>兴趣爱好及特长</td>
+                   				<td colspan="7"><{$vo.hobby}></td>
+                   			</tr>
+                   			<tr>
+								<th colspan="8" class="text-center">家长信息</th>
+							</tr>
+							<foreach name="pinfo" item="data">
+								<tr>
+									<td>家长姓名</td>
+									<td colspan="2"><{$data.pname}></td>
+									<td>关系</td>
+									<td><{$data.relation}></td>
+									<td>手机号</td>
+									<td colspan="2"><{$data.tel}></td>
+								</tr>
+							</foreach>
+							<tr>
+								<td colspan="3" rowspan="2"></td>
+								<td>家长签字：</td>
+                				<td colspan="4"></td>
+							</tr>
+							<tr>
+								<td>日期：</td>
+                				<td colspan="4"></td>
+							</tr>
+                    	</table>
+                    </div>
+                </div>
+			</div>
+		</div>
+		<div class="clearfix">
+			<div class="col-sm-12">
+			<button type="button" id="print" class="btn btn-primary btn-block">打印</button>
+			</div>
+		</div>
+
+	</div>
+</body>
+<!-- 全局js -->
+<include file="/public/foot" />
+<script src="__HPLUS__/js/plugins/jqprint/jquery.jqprint-0.3.js"></script>
+<script lang="javascript">
+$("#print").click(function(){
+	$("#printContainer").jqprint({
+	     debug: false, //如果是true则可以显示iframe查看效果（iframe默认高和宽都很小，可以再源码中调大），默认是false
+	     importCSS: true, //true表示引进原来的页面的css，默认是true。（如果是true，先会找$("link[media=print]")，若没有会去找$("link")中的css文件）
+	     printContainer: true, //表示如果原来选择的对象必须被纳入打印（注意：设置为false可能会打破你的CSS规则）。
+	     operaSupport: true//表示如果插件也必须支持歌opera浏览器，在这种情况下，它提供了建立一个临时的打印选项卡。默认是true
+	});
+})
+</script>
+</html>

@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+<head>
+<include file="public:header" />
+<!-- jqgrid-->
+<link href="__HPLUS__/css/plugins/jqgrid/ui.jqgrid.css?0820" rel="stylesheet">
+<link href="__HPLUS__/js/plugins/fancybox/jquery.fancybox.css" rel="stylesheet">
+<!-- Data picker -->
+<link href="__HPLUS__/css/plugins/datapicker/datepicker3.css" rel="stylesheet">
+<style>
+  .fr {
+    float: right;
+  }
+  .el-table td {
+    vertical-align: top;
+  }
+  .card-item {
+    width: 80px;
+    display: inline-block;
+    text-align: center;
+    margin-right: 15px;
+    vertical-align: top;
+  }
+  .card-item:last-child {
+    margin-right: 0;
+  }
+  .card-item .img-wrap {
+    position: relative;
+    left: 0;
+    right: 0;
+    width: 80px;
+    height: 100px;
+  }
+  .card-item .img-wrap img {
+    display: inline-block;
+    height: 100%;
+    width: 100%;
+    vertical-align: middle;
+  }
+</style>
+</head>
+
+<body class="gray-bg">
+  <div class="wrapper wrapper-content animated fadeInRight" id="app" v-cloak>
+    <div class="row">
+      <div class="col-sm-12">
+          <div class="ibox ">
+            <div class="ibox-content">
+              <div class="ibox-search-box">
+                <el-row :gutter="0" style="margin-bottom: 10px;">
+                  <el-col :span="6">
+                    <el-date-picker
+                      v-model="searchDay"
+                      type="date"
+                      placeholder="选择日期">
+                    </el-date-picker>
+                  </el-col>
+                  <el-col :span="4">
+                    <button type="button" @click="getCookbooksByWeek(searchDay)"
+                      class="btn btn-success btn-block" >搜索</button>
+                  </el-col>
+                </el-row>
+        	    </div>
+              <p>
+                <button type="button"
+                  class="btn btn-white btn-sm btn-outline"
+                  @click="checkWeekData(-1)">&lt;&lt; 查看上一周</button>
+                <button type="button"
+                  class="btn btn-white btn-sm btn-outline"
+                  @click="checkWeekData(1)">查看下一周 &gt;&gt;</button>
+                <button type="button"
+                  class="btn btn-white btn-sm btn-outline fr"
+                  @click="copyConfirm">复制到下一周</button>
+              </p>
+              <!-- 菜谱表格 -->
+              <template>
+                <el-table
+                  :data="weekdata"
+                  border
+                  style="width: 100%;"
+                  max-height="600">
+                  <el-table-column
+                    prop="date"
+                    label="日期"
+                    width="150">
+                  </el-table-column>
+                  <template>
+                    <el-table-column v-for="(mitem, mkey) in mealTypeArr" :key="mkey"
+                      :label="mitem">
+                      <template slot-scope="scope">
+                        <div class="card-item"
+                          v-for="item in scope.row.cookbook[mkey]">
+                          <div v-if="cookbookData[item]">
+                            <div class="img-wrap">
+                              <a class="fancybox"
+                                v-if="cookbookData[item].imgurl"
+                                :href="cookbookData[item].imgurl">
+                                <img :src="cookbookData[item].imgurl" alt="点击放大">
+                              </a>
+                              <div v-else class="noimg"></div>
+                            </div>
+                            <p>{{cookbookData[item].name}}</p>
+                          </div>
+                        </div>
+                      </template>
+                    </el-table-column>
+                  </template>
+                  <el-table-column
+                    label="操作"
+                    width="90">
+                    <template slot-scope="scope">
+                      <el-button
+                        @click.native.prevent="deleteRow(scope.$index, weekdata)"
+                        type="text"
+                        size="small">
+                        移除
+                      </el-button>
+                      <el-button
+                        @click.native.prevent="editRow(scope.$index, weekdata)"
+                        type="text"
+                        size="small">
+                        编辑
+                      </el-button>
+                    </template>
+                  </el-table-column>
+                </el-table>
+              </template>
+            </div>
+          </div>
+      </div>
+    </div>
+  </div>
+</body>
+<!-- 全局js -->
+<include file="public:foot" />
+<!-- jqGrid -->
+<script src="__HPLUS__/js/plugins/jqgrid/i18n/grid.locale-cn.js?0820"></script>
+<script src="__HPLUS__/js/plugins/jqgrid/jquery.jqGrid.min.js?0820"></script>
+<script src="__HPLUS__/js/plugins/fancybox/jquery.fancybox.js"></script>
+<!-- Data picker -->
+<script src="__HPLUS__/js/plugins/datapicker/bootstrap-datepicker.js"></script>
+<!-- Page-Level Scripts -->
+<script src="__HPLUS__/js/common/util.js"></script>
+<script>
+$(function () {
+  //图片全屏加载
+  $('.fancybox').fancybox({openEffect: 'none', closeEffect: 'none'});
+  var vm = new Vue({
+    el: '#app',
+    data: function () {
+      return { 
+        searchDay: '',
+        cookbookData: {},
+        mealTypeArr: {
+          breakfast: '早餐',
+          morningTea: '早茶',
+          lunch: '午餐',
+          afternoonTea: '下午茶',
+        },
+        weekdata: []
+      }
+    },
+    methods: {
+      // 字典数据处理
+      cookbookDataHandle: function (data) {
+        var _result = {};
+        for (var i = 0; i < data.length; i++) {
+          var _item = data[i]
+          _result[_item.id] = _item
+        }
+        return _result
+      },
+      // 获取菜谱字典
+      getCookbookDic: function (date) {
+        var req = {}
+        var self = this
+        $.ajax({
+          url: '__URL__/getCookbooks',
+          type: 'get',
+          success: function (res) {
+            var _tempData = self.cookbookDataHandle(res.data);
+            self.cookbookData = _tempData
+            window.localStorage.setItem('cookdic', JSON.stringify(_tempData) || '');
+          }
+        })
+      },
+      // 删除菜谱数据
+      deleteRow: function (index, rows) {
+        var date = rows[index].date;
+        var self = this;
+        if(date != null) {
+          layer.confirm('确定删除？', function(index) {
+            self.delCookbooks(date);
+          });
+        } else {
+          layer.msg('您没有选取数据！');
+        }
+      },
+      // 显示菜谱编辑弹窗
+      editRow: function (index, rows) {
+        var date = rows[index].date.split(' ')[0];
+        if (date != null) {
+          layerDialog('编辑菜谱', '__URL__/edit?date=' + date, '80%', '75%', true);
+        } else {
+          layer.msg('您没有选取数据！');
+        }
+      },
+      // 编辑菜谱-删除编辑新增多用
+      delCookbooks: function (date) {
+        var self = this
+        var req = { begin: date }
+        $.ajax({
+          url: '__URL__/delCookbooks',
+          type: 'post',
+          data: req,
+          success: function (res) {
+            if (res.code === 200) {
+              layer.msg(res.msg);
+              self.getCookbooksByWeek(self.searchDay)
+            } else {
+              layer.msg(res.msg)
+            }
+          }
+        })
+      },
+      // 获取一周菜谱数据
+      getCookbooksByWeek: function (date) {
+        var self = this;
+        var req = { begin: util.formatDate(new Date(date), 'yyyy-MM-dd') };
+        $.ajax({
+          url: '__URL__/getCookbooksByWeek',
+          type: 'get',
+          data: req,
+          success: function (res) {
+            if (res.code === 200) {
+              self.weekdata = res.data;
+            } else {
+              layer.msg(res.msg);
+            }
+          }
+        })
+      },
+      // 查看下周/上周数据
+      checkWeekData: function (n) {
+        var _dateTemp = new Date(this.searchDay);
+        var _yy = _dateTemp.getFullYear();
+        var _mm = _dateTemp.getMonth();
+        var _dd = _dateTemp.getDate();
+        var _diff = 0;
+        if (n > 0) {
+          _diff = 1;
+        } else {
+          _diff = -1;
+        }
+        var _resDate = new Date(_yy, _mm, _dd + _diff * 7);
+        this.searchDay = _resDate;
+        this.getCookbooksByWeek(_resDate);
+      },
+      // 复制到下周确认
+      copyConfirm: function () {
+        var self = this
+        var selectedDate = util.formatDate(new Date(this.searchDay), 'yyyy-MM-dd')
+        layer.confirm('您选择的当前日期为' + selectedDate + ', 确定复制到下周？', function() {
+          self.copyToNextWeek(selectedDate)
+        });
+      },
+      copyToNextWeek: function (selectedDate) {
+        var self = this;
+        var req = { begin: util.formatDate(new Date(selectedDate), 'yyyy-MM-dd') };
+        $.ajax({
+          url: '__URL__/copyWeekCookbook',
+          type: 'post',
+          data: req,
+          success: function (res) {
+            layer.msg(res.msg)
+          }
+        })
+      }
+    },
+    created: function () {
+      var dateNow = util.formatDate(new Date(), 'yyyy-MM-dd');
+      this.searchDay = dateNow;
+      this.getCookbookDic();
+      this.getCookbooksByWeek(dateNow);
+    }
+  });
+  window.vm = vm;
+})
+</script>
+</html>

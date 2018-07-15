@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<include file="public:header" />
+<link href="__HPLUS__/css/dialog.css" rel="stylesheet">
+<link href="__HPLUS__/js/plugins/fancybox/jquery.fancybox.css" rel="stylesheet">
+<style>
+.row .col-sm-4,.row .col-sm-12{ margin-top:15px;}
+</style>
+  <body class="gray-bg">
+	  <div class="wrapper wrapper-content animated fadeInRight">
+	  	<div class="ibox">
+            <div class="ibox-title">
+                <h5>基本信息</h5>
+            </div>
+            <div class="ibox-content">
+                <div class="row">
+                	<div class="col-sm-4">
+			  			姓名：<{$vo.user_name}>
+			  		</div>
+			  		<div class="col-sm-4">
+			  			性别：<{$vo.sex}>
+			  		</div>
+			  		<div class="col-sm-4">
+			  			手机号：<{$vo.tel}>
+			  		</div>
+			  		<div class="col-sm-4">
+			  			所属部门：<{$vo.subtype.subtype_name}>
+			  		</div>
+			  		<eq name="vo.type" value="1">
+			  		<div class="col-sm-4">
+			  			办公地点：<{$vo.address}>
+			  		</div>
+			  		</eq>
+			  		<div class="col-sm-4">
+			  			状态：<font style="color:red;"><{:$vo['status']==1?"正常":"锁定"}></font>
+			  		</div>
+			  		<div class="col-sm-4">
+			  			创建时间：<{$vo.create_time|date="Y-m-d H:i:s",###}>
+			  		</div>
+			  		<div class="col-sm-4">
+			  			最后修改时间：<{$vo.update_time|date="Y-m-d H:i:s",###}>
+			  		</div>
+			  		<div class="col-sm-12">
+			  			头像：<notempty name="vo.head_img"><a class="fancybox" href="__IMGROOT__<{$vo.head_img}>"><img src="__IMGROOT__<{$vo.head_img}>" style="width: 100px;"></a></notempty>
+			  		</div>
+			  	</div>
+            </div>
+        </div>
+	  </div>
+  </body>
+<!-- 全局js -->
+<include file="public:foot" />
+<script src="__HPLUS__/js/plugins/fancybox/jquery.fancybox.js"></script>
+<script type="text/javascript">
+$(function(){
+	//图片全屏加载
+	$(".fancybox").fancybox({openEffect:"none",closeEffect:"none"});
+})
+</script>
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<include file="public:header" />
+	<!-- jqgrid-->
+	<link href="__HPLUS__/css/plugins/jqgrid/ui.jqgrid.css?0820" rel="stylesheet">
+</head>
+
+<body class="gray-bg">
+<div class="wrapper wrapper-content  animated fadeInRight">
+	<input id="id" class="hide" value="<{$id}>"/>
+	<div class="row">
+		<div class="col-sm-12">
+			<div class="ibox ">
+				<div class="ibox-content">
+					<p>
+						<button type="button" id="addchild" class="btn btn-white btn-sm btn-outline"><i class="fa fa-plus-square-o"></i>&nbsp;新增孩子</button>
+						<button type="button" id="editchild" class="btn btn-white btn-sm btn-outline"><i class="fa fa-edit"></i>&nbsp;修改孩子信息</button>
+					</p>
+					<div class="jqGrid_wrapper">
+						<table id="table_list"></table>
+						<div id="pager_list"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+</body>
+<!-- 全局js -->
+<include file="public:foot" />
+<!-- jqGrid -->
+<script src="__HPLUS__/js/plugins/jqgrid/i18n/grid.locale-cn.js?0820"></script>
+<script src="__HPLUS__/js/plugins/jqgrid/jquery.jqGrid.min.js?0820"></script>
+<!-- Page-Level Scripts -->
+<script>
+    $(document).ready(function () {
+        //初始化
+        $.jgrid.defaults.styleUI = 'Bootstrap';
+        $("#table_list").jqGrid({
+            url : '__URL__/getChildData?id=' + $("#id").val(),
+            datatype: "json",
+            height: 450,
+            autowidth: true,
+            shrinkToFit: true,
+            rowNum: 15,
+            rowList: [10, 15, 30, 50],
+            colNames : [ '姓名','班级','性别','学号','关系','状态','操作'],
+            colModel : [ {name : 'realname',index : 'realname'},
+						{name : 'classname',index : 'classname'},
+						{name : 'sex',index : 'sex',formatter : function(cellvalue, options, rowObject){
+                                var content ="";
+                                if(cellvalue == 1) {
+                                    content = '男';
+                                }else if(cellvalue == 2) {
+                                    content = '女';
+                                }
+                                return content;
+                            }},
+						{name : 'code',index : 'code'},
+						{name : 'relation',index : 'relation'},
+						{name : 'status',index : 'status',formatter : function(cellvalue, options, rowObject){
+                                var content ="";
+                                if(cellvalue == 1) {
+                                    content = '<font color="green">正常</font>';
+                                }else if(cellvalue == -1) {
+                                    content = '<font color="red">毕业</font>';
+                                }else if(cellvalue == -2){
+                                    content = '<font color="blue">离校</font>';
+                                }
+                                return content;
+                            }},
+						{name : 'flag',index : 'flag',formatter : function(cellvalue, options, rowObject){
+								content='<button class="btn btn-danger btn-xs btn-outline" onclick="del('+rowObject.id+')"><i class="fa fa-trash"></i>  删除</button>';;
+                        return content;
+                    }}
+            ],
+            pager: "#pager_list",
+            viewrecords: true,
+            hidegrid: false,
+            sortname: "id",
+            sortorder: "desc",
+        });
+        // 设置按钮
+        $("#table_list").jqGrid('navGrid', '#pager_list', {
+            edit: false,
+            add: false,
+            del: false,
+            search: false
+        }, {
+            height: 200,
+            reloadAfterSubmit: true
+        });
+        // 添加适配响应
+        $(window).bind('resize', function () {
+            var width = $('.jqGrid_wrapper').width();
+            $('#table_list').setGridWidth(width);
+        });
+        //新增孩子
+        $("#addchild").click(function() {
+            var id = $("#id").val();
+            layerDialog("添加孩子",'__URL__/addchild?id='+id+'&type='+$("#type").val(),"90%","90%",true);
+        });
+        //修改孩子信息
+        $("#editchild").click(function() {
+            var id = $("#table_list").jqGrid('getGridParam','selrow');
+            if(id != null) {
+                layerDialog("修改",'__URL__/editchild?id='+id+'&type='+$("#type").val(),"90%","90%",true);
+            }else {
+                layer.msg("您没有选取数据！");
+            }
+        })
+    });
+    //删除孩子
+    function del(id){
+        layer.confirm('确定删除？', function(index){
+            var index = layer.load(2);
+            $.ajax({
+                url:"__URL__/childLogicDel",
+                type:"post",
+                data:{'id':id},
+                success:function(data){
+                    if(data.status == 1){
+                        layer.msg(data.info);
+                        $('#table_list').trigger("reloadGrid");
+                    }else{
+                        layer.msg(data.info);
+                    }
+                    layer.close(index);
+                }
+            })
+        });
+    }
+</script>
+</html>

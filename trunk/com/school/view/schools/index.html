@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+<include file="public:header" />
+<link href="__HPLUS__/css/dialog.css" rel="stylesheet">
+<link href="__HPLUS__/css/plugins/validform/validform.css" rel="stylesheet">
+<link href="__HPLUS__/js/plugins/uploadImg/upload.css" rel="stylesheet">
+<link href="__HPLUS__/js/plugins/fancybox/jquery.fancybox.css" rel="stylesheet">
+<style>
+	.form-control{ padding-left:5px;}
+</style>
+  <body>
+	  <div class="wrapper wrapper-content animated fadeInRight">
+	  	<div class="row">
+    		<div class="col-sm-12">
+    			<div class="ibox float-e-margins">
+	                <div class="ibox-content">
+	                	<div class="alert alert-danger">
+	                		<p>站点参数为全站运行参数，请勿随意操作，以免影响站点正常运行！！！</p>
+                   	 	</div>
+	                </div>
+	            </div>
+    		</div>
+    	</div>
+		<form role="form" class="form" action="__URL__/update" method="post">
+			<input type="hidden" name="id" value="<{$vo.id}>">
+			<div class="form-group">
+				<label class="col-sm-2 control-label">上班/下班时间：</label>
+				<div class="col-sm-10">
+					<input type="hidden" name="onwork_time" id="onwork_time" value="<{$vo.onwork_time}>" />
+					<input type="hidden" name="offwork_time" id="offwork_time" value="<{$vo.offwork_time}>" />
+					<input type="text" datatype="*" id="laydate1" class="form-control" placeholder="上班/下班时间">
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">上学/放学时间：</label>
+				<div class="col-sm-10">
+					<input type="hidden" name="onschool_time" id="onschool_time" value="<{$vo.onschool_time}>" />
+					<input type="hidden" name="offschool_time" id="offschool_time" value="<{$vo.offschool_time}>" />
+					<input type="text" datatype="*" id="laydate2" class="form-control" placeholder="上学/放学时间">
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">学校地址：</label>
+				<div class="col-sm-10">
+					<input type="text" datatype="*" name="address" class="form-control" value="<{$vo.address}>" placeholder="学校地址">
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">客服电话(选填)：</label>
+				<div class="col-sm-10">
+					<input type="text" name="custome_tel" class="form-control" value="<{$vo.custome_tel}>" placeholder="客服手机">
+				</div>
+			</div>
+			<div class="clearfix"></div><br/>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">招生电话(选填)：</label>
+				<div class="col-sm-10">
+					<input type="text" name="recruit_tel" class="form-control" value="<{$vo.recruit_tel}>" placeholder="招生电话">
+				</div>
+			</div>
+			<div class="clearfix"></div><br/>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">学校简介(选填)：</label>
+				<div class="col-sm-10">
+					<input type="text" name="desc" class="form-control" value="<{$vo.desc}>" placeholder="学校简介">
+				</div>
+			</div>
+			<div class="clearfix"></div><br/>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">学校主页(选填)：</label>
+				<div class="col-sm-10">
+					<input type="text" datatype="url" ignore="ignore" name="website" class="form-control" value="<{$vo.website}>" placeholder="学校主页">
+				</div>
+			</div>
+			<div class="clearfix"></div><br/>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">学校logo(选填)：</label>
+				<div class="col-sm-10">
+					<div class="file-up"  data-num="1">
+						<input id="photo" name="logo" value="<{$vo.logo}>" type="hidden" />
+						<section class="file-box">
+							<img src="__HPLUS__/js/plugins/uploadImg/img/choose.png" class="add-img">
+							<button type="button" onclick="doUpload(this)" class="file"></button>
+						 </section>
+					</div>
+				</div>
+			</div>
+			<!-- 
+			<div class="form-group">
+				<label class="col-sm-2 control-label">学校详情：</label>
+				<div class="col-sm-10">
+					<script type="text/plain" id="myEditor" style="width:100%;height:240px;">
+    					<p></p>
+					</script>
+					<div class="clearfix"></div>
+					<input class="form-control" type="hidden" datatype="*" id="content-input" name="about_us">
+					<span class="Validform_checktip"></span>
+				</div>
+			</div>
+			 -->
+			<div class="clearfix"></div><br/>
+			<div class="clearfix">
+				<button type="submit" id="submit" class="btn btn-success btn-block">提交</button>
+				<button type="reset" id="reset2" class="hidden btn btn-success btn-block">重置</button>
+			</div>
+		</form>
+	  </div>
+  </body>
+<!-- 全局js -->
+<include file="public:foot" />
+<script src="__HPLUS__/js/plugins/validform/Validform_v5.3.2_min.js"></script>
+<script src="__HPLUS__/js/jquery.md5.js"></script>
+<!-- laydate -->
+<script src="__HPLUS__/js/plugins/layer/laydate/laydate.js"></script>
+<script type="text/javascript" src="__HPLUS__/js/plugins/uploadImg/jquery.upload.js"></script>
+<script src="__HPLUS__/js/plugins/fancybox/jquery.fancybox.js"></script>
+<script>
+$(document).ready(function () {
+	//询问框
+	layer.alert('站点参数为全站运行参数，如操作错误，可能会造成网站或App错误，请确定是否知悉操作方式？', {
+	  btn: ['我已知悉！'] //按钮
+	});
+	//大图展示
+	$(".fancybox").fancybox({openEffect:"none",closeEffect:"none"});
+	//图片回显
+	var imgSrc = $(".file-up").find("input[type='hidden']").val();
+	if(imgSrc != ""){
+		imgSrc = imgSrc.split("|");
+		for(var i = 0;i < imgSrc.length;i++){
+			$.appendImg($(".file-up").find("button"),imgSrc[i]);
+		}
+		//图片独立服务器追加表头
+        $(".file-box a.fancybox").each(function(){
+            var href = "__IMGROOT__"+$(this).attr("href");
+            $(this).attr("href",href);
+        });
+		$(".file-box img.up-img").each(function(){
+			var src = "__IMGROOT__"+$(this).attr("src");
+			console.log(src);
+			$(this).attr("src",src);
+		})
+	}
+})
+function doUpload(t) {
+	$.upload({
+        url: '__URL__/uploadImg', 
+        fileName: 'image', 
+        dataType: 'json',
+        acceptType:'image/jpeg,image/png',
+        onSend: function() {
+                return true;
+        },
+        // 上传之后回调
+        onComplate: function(data) {
+        	if(data.status == 1){
+        		var url =data.data;
+        		$.appendImg(t,url);
+        		//图片独立服务器追加表头
+                $(".file-box a.fancybox").each(function(){
+                    var href = "__IMGROOT__"+$(this).attr("href");
+                    $(this).attr("href",href);
+                });
+        		$(".file-box img.up-img").each(function(){
+        			var src = "__IMGROOT__"+$(this).attr("src");
+        			$(this).attr("src",src);
+        		})
+        	}else{
+        		layer.alert(data.info);
+        	}
+        }
+	});
+}
+$(function(){
+	//执行一个laydate实例
+	laydate.render({
+		elem: '#laydate1',
+		type: 'time',
+		theme: '#1c84c6',
+		format: 'HH:mm:ss',
+		min: '06:00:00',
+		max: '20:00:00',
+		value: '<{:empty($vo.onwork_time)?"08:00:00":$vo.onwork_time}> - <{:empty($vo.offwork_time)?"18:00:00":$vo.offwork_time}>',
+		range: true
+	});
+	laydate.render({
+		elem: '#laydate2',
+		type: 'time',
+		theme: '#1c84c6',
+		format: 'HH:mm:ss',
+		min: '06:00:00',
+		max: '20:00:00',
+		value: '<{:empty($vo.onschool_time)?"08:00:00":$vo.onschool_time}> - <{:empty($vo.offschool_time)?"18:00:00":$vo.offschool_time}>',
+		range: true
+	});
+	  
+	$("#reset2").click();
+	var index = parent.layer.getFrameIndex(window.name);
+	var form = $(".form").Validform({
+		tiptype:4,
+		ajaxPost:true,
+		beforeSubmit:function(){
+			var time = $("#laydate1").val();
+			var timeArr = time.split('-');
+			$("#onwork_time").val(timeArr[0]);
+			$("#offwork_time").val(timeArr[1]);
+			var time = $("#laydate2").val();
+			var timeArr = time.split('-');
+			$("#onschool_time").val(timeArr[0]);
+			$("#offschool_time").val(timeArr[1]);
+		},
+		callback:function(data){
+			if(data.status == 1) {
+				window.layer.msg(data.info);
+				window.location.reload();
+				parent.layer.close(index);
+			}else{
+				window.layer.msg(data.info);
+			}
+		}
+	});
+})
+</script>
+</html>

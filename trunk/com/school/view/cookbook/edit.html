@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<include file="public:header" />
+<link href="__HPLUS__/css/dialog.css" rel="stylesheet">
+<link href="__HPLUS__/css/plugins/validform/validform.css" rel="stylesheet">
+<link href="__HPLUS__/js/plugins/uploadImg/upload.css" rel="stylesheet">
+<link href="__HPLUS__/js/plugins/fancybox/jquery.fancybox.css" rel="stylesheet">
+<style>
+	.form-control{ padding-left:5px;}
+</style>
+  <body>
+	  <div class="wrapper wrapper-content animated fadeInRight">
+		<form role="form" class="form" action="__URL__/update">
+			<input type="hidden" name="id" value="<{$vo.id}>">
+			<div class="form-group">
+				<label class="col-sm-2 control-label">菜名：</label>
+				<div class="col-sm-10">
+					<input type="text" datatype="*" name="name" class="form-control" placeholder="输入菜名" value="<{$vo.name}>">
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">类别：</label>
+				<div class="col-sm-10">
+					<select name="type" class="form-control" datatype="*">
+						<option value="">请选择</option>
+						<option value="5" <if condition="$vo.type eq 5"> selected</if>>主食</option>
+						<option value="1" <if condition="$vo.type eq 1"> selected</if>>荤菜</option>
+						<option value="2" <if condition="$vo.type eq 2"> selected</if>>素菜</option>
+						<option value="3" <if condition="$vo.type eq 3"> selected</if>>汤</option>
+						<option value="4" <if condition="$vo.type eq 4"> selected</if>>点心</option>
+						<option value="6" <if condition="$vo.type eq 6"> selected</if>>其他</option>
+					</select>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">原材料(选填)：</label>
+				<div class="col-sm-10">
+					<input type="text" name="materials" class="form-control" placeholder="输入原材料" value="<{$vo.materials}>">
+				</div>
+			</div>
+			<div class="clearfix"></div><br/>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">描述(选填)：</label>
+				<div class="col-sm-10">
+					<input type="text" name="desc" class="form-control" placeholder="描述" value="<{$vo.desc}>">
+				</div>
+			</div>
+			<div class="clearfix"></div><br/>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">照片(选填)：</label>
+				<div class="col-sm-10">
+					<div class="file-up"  data-num="1">
+						<input id="photo" name="img" value="<{$vo.img}>" type="hidden" />
+						<section class="file-box">
+							<img src="__HPLUS__/js/plugins/uploadImg/img/choose.png" class="add-img">
+							<button type="button" onclick="doUpload(this)" class="file"></button>
+						 </section>
+					</div>
+				</div>
+			</div>
+			<div class="clearfix"></div><br>
+			<div class="clearfix">
+				<button type="submit" id="submit" class="btn btn-success btn-block">提交</button>
+				<button type="reset" id="reset2" class="hidden btn btn-success btn-block">重置</button>
+			</div>
+		</form>
+	  </div>
+  </body>
+<!-- 全局js -->
+<include file="public:foot" />
+<script src="__HPLUS__/js/plugins/validform/Validform_v5.3.2_min.js"></script>
+<script src="__HPLUS__/js/jquery.md5.js"></script>
+<script type="text/javascript" src="__HPLUS__/js/plugins/uploadImg/jquery.upload.js"></script>
+<script src="__HPLUS__/js/plugins/fancybox/jquery.fancybox.js"></script>
+<script>
+$(document).ready(function () {
+	//大图展示
+	$(".fancybox").fancybox({openEffect:"none",closeEffect:"none"});
+	//图片回显
+	var imgSrc = $(".file-up").find("input[type='hidden']").val();
+	if(imgSrc != ""){
+		imgSrc = imgSrc.split("|");
+		for(var i = 0;i < imgSrc.length;i++){
+			$.appendImg($(".file-up").find("button"),imgSrc[i]);
+		}
+		//图片独立服务器追加表头
+        $(".file-box a.fancybox").each(function(){
+            var href = "__IMGROOT__"+$(this).attr("href");
+            $(this).attr("href",href);
+        });
+		$(".file-box img.up-img").each(function(){
+			var src = "__IMGROOT__"+$(this).attr("src");
+			console.log(src);
+			$(this).attr("src",src);
+		})
+	}
+})
+function doUpload(t) {
+	$.upload({
+        url: '__URL__/uploadImg', 
+        fileName: 'image', 
+        dataType: 'json',
+        acceptType:'image/jpeg,image/png',
+        onSend: function() {
+                return true;
+        },
+        // 上传之后回调
+        onComplate: function(data) {
+        	if(data.status == 1){
+        		var url =data.data;
+        		$.appendImg(t,url);
+        		//图片独立服务器追加表头
+                $(".file-box a.fancybox").each(function(){
+                    var href = "__IMGROOT__"+$(this).attr("href");
+                    $(this).attr("href",href);
+                })
+        		$(".file-box img.up-img").each(function(){
+        			var src = "__IMGROOT__"+$(this).attr("src");
+        			$(this).attr("src",src);
+        		})
+        	}else{
+        		layer.alert(data.info);
+        	}
+        }
+	});
+}
+$(function(){
+	$("#reset2").click();
+	var index = parent.layer.getFrameIndex(window.name);
+	var form = $(".form").Validform({
+		tiptype:4,
+		ajaxPost:true,
+		callback:function(data){
+			if(data.status == 1) {
+				window.parent.layer.msg(data.info);
+				window.parent.$('#table_list').trigger("reloadGrid");
+				parent.layer.close(index);
+			}else{
+				window.parent.layer.msg(data.info);
+			}
+		}
+	});
+})
+</script>
+</html>

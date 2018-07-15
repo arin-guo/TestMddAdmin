@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+<include file="public:header" />
+<!-- jqgrid-->
+<link href="__HPLUS__/css/plugins/jqgrid/ui.jqgrid.css?0820" rel="stylesheet">
+</head>
+
+<body class="gray-bg">
+    <div class="wrapper wrapper-content animated fadeInRight">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="ibox ">
+                    <div class="ibox-content">
+                    	<div class="ibox-search-box">
+                    		<div class="row">
+	                    		<div class="infont col-md-2">
+		                    		<input type="text" name="tel" class="form-control" placeholder="姓名">
+								</div>
+                                <div class="infont col-md-2">
+                                    <select class="form-control" name="type" placeholder="来源">
+                                        <option value=" ">请选择</option>
+                                        <option value="1">家长</option>
+                                        <option value="2">教师</option>
+                                    </select>
+                                </div>
+								<div class="infont col-md-2">
+	                    			<button class="btn btn-success btn-block btn-ibox-search" type="button">搜索</button>
+	                    		</div>
+                    		</div>
+                    	</div>
+                        <div class="jqGrid_wrapper">
+                            <table id="table_list"></table>
+                            <div id="pager_list"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<!-- 全局js -->
+<include file="public:foot" />
+<!-- jqGrid -->
+<script src="__HPLUS__/js/plugins/jqgrid/i18n/grid.locale-cn.js?0820"></script>
+<script src="__HPLUS__/js/plugins/jqgrid/jquery.jqGrid.min.js?0820"></script>
+<!-- Page-Level Scripts -->
+<script>
+$(document).ready(function () {
+	//初始化
+    $.jgrid.defaults.styleUI = 'Bootstrap';
+    $("#table_list").jqGrid({
+    	url : '__URL__/getAllData',
+    	datatype: "json",
+        height: 620,
+        autowidth: true,
+        shrinkToFit: true,
+        rowNum: 15,
+        rowList: [10, 15, 30, 50],
+        colNames: ['ID','姓名','手机号','来源','意见','创建时间','操作'],
+        colModel: [ {name : 'id',index : 'id',hidden:true},
+	                {name : 'tel',index : 'tel',formatter : function(cellvalue, options, rowObject){
+                            var content = "";
+                            if(cellvalue != null && cellvalue.length != 0 && cellvalue != ""){
+                                content = cellvalue;
+                            }else{
+                                content = '匿名';
+                            }
+                            return content;
+                        }},
+                    {name : 'phone',index : 'phone',formatter : function(cellvalue, options, rowObject){
+                            var content ="";
+                            if(cellvalue != null && cellvalue.length != 0 && cellvalue != ""){
+                                content = cellvalue;
+                            }else{
+                                content = '无';
+                            }
+                            return content;
+                        }},
+	                {name : 'type',index : 'type',formatter : function(cellvalue, options, rowObject){
+                        var content = "";
+                        switch(cellvalue){
+	                        case 1: content = "家长";break;
+	                        case 2: content = "教师";break;
+	                        case 3: content = "园长";break;
+                        }
+                        return content;
+                    }},
+	                {name : 'content',index : 'content'},
+	                {name : 'create_time',index : 'create_time',formatter: 'date',formatoptions: {srcformat:'u',newformat:'Y-m-d H:i:s'}},
+	                {name : 'status',index : 'status',width:"50px",formatter : function(cellvalue, options, rowObject){
+                  		 var content ="";
+	                   	 if(cellvalue == 1) {
+	                   		 content = '<button class="btn btn-primary btn-xs btn-outline" onclick="updateStatus('+ rowObject.id +','+ 2 +')"><i class="fa fa-toggle-on"></i>  已读</button>';
+	                   	 }
+                  	 	return content;
+             	 	}}
+        		],
+        pager: "#pager_list",
+        viewrecords: true,
+        hidegrid: false,
+        sortname: "id",
+        sortorder: "desc"
+    });
+
+ 	// 设置按钮
+    $("#table_list").jqGrid('navGrid', '#pager_list', {
+        edit: false,
+        add: false,
+        del: false,
+        search: false
+    }, {
+        height: 200,
+        reloadAfterSubmit: true
+    });
+    // 添加适配响应
+    $(window).bind('resize', function () {
+        var width = $('.jqGrid_wrapper').width();
+        $('#table_list').setGridWidth(width);
+    });
+  	//搜索
+    $(".btn-ibox-search").click(function() {
+    	result = getSearchParamByInput();
+    	$("#table_list").jqGrid('setGridParam', {
+    		page: 1,
+    		url : '__URL__/getAllData' + result
+    	}).trigger("reloadGrid");
+    })
+    //监控回车
+    $(".ibox-search-box").find(":input").keydown(function(event) {
+		if(event.keyCode == 13){
+			$(".btn-ibox-search").trigger("click");
+		}
+	})
+    
+    //获取搜索条件（仅限封装简单条件）
+    function getSearchParamByInput() {
+    	var result = "";
+    	$(".ibox-search-box").find(":input").each(function() {
+    		if($(this).val() != "") {
+    			if(result != "") {
+    				result += "&";
+    			}else{
+    				result += "?";
+    			}
+    			result += $(this).attr("name") + "=" + $(this).val();
+    		}
+    	})
+    	return result;
+    }
+    
+});
+
+function updateStatus(id,value) {
+	layer.confirm('确定执行？', function(index){
+		$.ajax({
+			url:"__URL__/updateStatus",
+			type:"post",
+			data:{'id':id,'field':'status','value':value},
+			success:function(data){
+				if(data.status == 1){
+					layer.msg(data.info);
+					window.location.reload();
+				}else{
+					layer.msg(data.info);
+				}
+			}
+		})
+    	layer.close(index);
+	});
+}
+</script>
+</html>

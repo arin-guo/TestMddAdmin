@@ -1,0 +1,34 @@
+.wrap{ 
+	padding:20px;
+}
+
+/* 授权编辑页 */
+.checkmod {
+    margin-bottom: 20px;
+    border: 1px solid #ebebeb;
+}
+.checkmod dt {
+    padding-left: 10px;
+    margin-bottom:10px;
+    height: 30px;
+    line-height: 30px;
+    font-weight: bold;
+    border-bottom: 1px solid #ebebeb;
+    background-color: #ECECEC;
+}
+.checkmod dd {
+    padding-left: 10px;
+    line-height: 30px;
+}
+.hd-checkbox {
+	cursor:pointer;
+}
+.child_row .hd-checkbox {
+	margin-right:15px;
+}
+.checkmod dd .hd-checkbox {
+	font-weight:normal;
+}
+.checkmod dd .divsion {
+    margin-right: 20px;
+}

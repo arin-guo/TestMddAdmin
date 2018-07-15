@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <include file="public:header" />
+    <!-- jqgrid-->
+    <link href="__HPLUS__/css/plugins/jqgrid/ui.jqgrid.css?0820" rel="stylesheet">
+</head>
+
+<body class="gray-bg">
+    <div class="wrapper wrapper-content  animated fadeInRight">
+    	<input id="id" class="hide" value="<{$id}>"/>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="ibox ">
+                    <div class="ibox-content">
+                        <div class="jqGrid_wrapper">
+                            <table id="table_list"></table>
+                            <div id="pager_list"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<!-- 全局js -->
+<include file="public:foot" />
+<!-- jqGrid -->
+<script src="__HPLUS__/js/plugins/jqgrid/i18n/grid.locale-cn.js?0820"></script>
+<script src="__HPLUS__/js/plugins/jqgrid/jquery.jqGrid.min.js?0820"></script>
+<!-- Page-Level Scripts -->
+<script>
+$(document).ready(function () {
+	//初始化
+    $.jgrid.defaults.styleUI = 'Bootstrap';
+    $("#table_list").jqGrid({
+    	url : '__URL__/getAllStudentData?id=' + $("#id").val(),
+        datatype: "json",
+        height: 450,
+        autowidth: true,
+        shrinkToFit: true,
+        rowNum: 15,
+        rowList: [10, 15, 30, 50],
+        colNames : [ 'ID', '学号','姓名','身份证', '状态','创建时间'], 
+        colModel : [ {name : 'id',index : 'id'},
+				     {name : 'code',index : 'code'},
+				     {name : 'realname',index : 'realname'},
+				     {name : 'id_card',index : 'id_card'},
+			         {name : 'status',index : 'status',formatter : function(cellvalue, options, rowObject){
+			        	if(cellvalue == 1){
+			        		var content = '正常';
+			        	}else if(cellvalue == -1){
+			        		var content = '已毕业';
+			        	}else if(cellvalue == -2){
+			        		var content = '已转学';
+			        	}
+                       	return content;
+                	 }},
+                	 {name : 'create_time',index : 'create_time',formatter: 'date',formatoptions: {srcformat:'u',newformat:'Y-m-d H:i:s'}}
+                   ],
+        pager: "#pager_list",
+        viewrecords: true,
+        hidegrid: false,
+        sortname: "id",
+        sortorder: "desc",
+    });
+ 	// 设置按钮
+    $("#table_list").jqGrid('navGrid', '#pager_list', {
+        edit: false,
+        add: false,
+        del: false,
+        search: false
+    }, {
+        height: 200,
+        reloadAfterSubmit: true
+    });
+    // 添加适配响应
+    $(window).bind('resize', function () {
+        var width = $('.jqGrid_wrapper').width();
+        $('#table_list').setGridWidth(width);
+    });
+    
+});
+</script>
+</html>

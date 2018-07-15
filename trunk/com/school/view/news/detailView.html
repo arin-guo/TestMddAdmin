@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<include file="public:header" />
+<style>
+	@import url("/static/hplus/newstyle/newstyle-mobile.css") screen and (max-device-width: 600px);
+	@import url("/static/hplus/newstyle/newstyle.css") screen and (min-width: 601px);
+</style>
+<body>
+	<div id="page_content">
+		<div><img src="/static/hplus/newstyle/news-top.png" alt=""></div>
+		<div class="content_block">
+			<div class="news_top">
+				<h3 class="news_title"><{$vo.title}></h3>
+				<div class="news_time"><{$vo.create_time|date="Y-m-d H:i",###}></div>
+			</div>
+			<div class="news_audio">
+				<if condition="$vo.audio neq null">
+					<audio src="<{$vo.audio}>" controls>
+						你的浏览器不支持播放音频
+					</audio>
+				</if>
+			</div>
+			<div class="news_content">
+				<{$vo.content}>
+			</div>
+		</div>
+	</div>
+</body>
+<!-- 全局js -->
+<script src="__HPLUS__/js/jquery-2.1.1.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function () {
+	//音频src追加表头
+	$(".news_audio audio").each(function(){
+		var src = "__IMGROOT__"+$(this).attr("src");
+		console.log(src);
+		$(this).attr("src",src);
+	})
+})
+</script>
+</html>

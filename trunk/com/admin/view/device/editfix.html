@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<include file="public:header" />
+<link href="__HPLUS__/css/dialog.css" rel="stylesheet">
+<link href="__HPLUS__/css/plugins/validform/validform.css" rel="stylesheet">
+<!-- Data picker -->
+<link href="__HPLUS__/css/plugins/datapicker/datepicker3.css" rel="stylesheet">
+<style>
+	.form-control{ padding-left:5px;}
+</style>
+<body>
+<div class="wrapper wrapper-content animated fadeInRight">
+	<form role="form" class="form" action="__URL__/fixlogupdate">
+		<input type="hidden" name="id" value="<{$vo.id}>">
+		<div class="form-group">
+			<label class="col-sm-2 control-label">设备名称：</label>
+			<div class="col-sm-10">
+				<input type="text" name="" value="<{$vo.device_name}>" class="form-control" placeholder="设备名称" disabled >
+			</div>
+		</div>
+		<div class="clearfix"></div><br/>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">修理时间：</label>
+			<div class="col-sm-10 input-daterange">
+				<div class="col-sm-6">
+					<input type="text" name="fix_time" value="<{$vo.fix_time}>" datatype="*" class="form-control" readonly="readonly" placeholder="选择日期">
+				</div>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">修理内容：</label>
+			<div class="col-sm-10">
+				<input type="text" name="fix_notes" value="<{$vo.fix_notes}>" datatype="*" class="form-control" placeholder="修理记录">
+			</div>
+		</div>
+		<div class="clearfix"></div><br/>
+		<div class="clearfix">
+			<button type="submit" id="submit" class="btn btn-success btn-block">提交</button>
+			<button type="reset" id="reset2" class="hidden btn btn-success btn-block">重置</button>
+		</div>
+	</form>
+</div>
+</body>
+<!-- 全局js -->
+<include file="public:foot" />
+<script src="__HPLUS__/js/plugins/validform/Validform_v5.3.2_min.js"></script>
+<script src="__HPLUS__/js/jquery.md5.js"></script>
+<!-- Data picker -->
+<script src="__HPLUS__/js/plugins/datapicker/bootstrap-datepicker.js"></script>
+<script>
+    $(function(){
+        //Data picker
+        $('.input-daterange').datepicker({
+            keyboardNavigation: false,
+            forceParse: false,
+            autoclose: true,
+            todayHighlight: true
+        });
+        $("#reset2").click();
+        var index = parent.layer.getFrameIndex(window.name);
+        var form = $(".form").Validform({
+            tiptype:4,
+            ajaxPost:true,
+            callback:function(data){
+                if(data.status == 1) {
+                    window.parent.layer.msg(data.info);
+                    window.parent.$('#table_list').trigger("reloadGrid");
+                    parent.layer.close(index);
+                }else{
+                    window.parent.layer.msg(data.info);
+                }
+            }
+        });
+    })
+</script>
+</html>

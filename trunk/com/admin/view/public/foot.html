@@ -1,0 +1,246 @@
+<!-- 全局js -->
+<script src="__HPLUS__/js/jquery-2.1.1.min.js"></script>
+<script src="__HPLUS__/js/bootstrap.min.js?v=3.4.0"></script>
+<script src="__HPLUS__/js/content.js?v=1.0.0"></script>
+<!-- 弹出层插件js -->
+<script src="__HPLUS__/js/plugins/layer/layer.min.js"></script>
+<!-- Ajax加载插件js -->
+<!-- <script src="__HPLUS__/js/plugins/pace/pace.min.js"></script> -->
+<!-- 标签栏右键插件 -->
+<script src="__HPLUS__/js/plugins/contextmenu/jquery.contextmenu.js"></script>
+<!-- 全屏插件 -->
+<script src="__HPLUS__/js/plugins/fullscreen/jquery.fullscreen.js"></script>
+<!-- 圆角标签 -->
+<script src="__HPLUS__/js/plugins/iCheck/icheck.min.js"></script>
+<script src="__HPLUS__/js/plugins/cropper/cropper.min.js"></script>
+<script src="__HPLUS__/js/lib/vue.min@2.5.16.js"></script>
+<!-- <script src="__HPLUS__/js/lib/vue@2.5.16.js"></script> -->
+<script src="__HPLUS__/js/lib/element-ui@2.3.7.js"></script>
+<script>
+//封装后的弹窗控件方法
+function layerDialog(title,url,width,height,shadeClose) {/*title:dialog的标题,url:dialog的路径,width:dialog的宽度,height:dialog的高度,shadeClose:布尔值，点击遮罩层是否关闭当前窗口*/
+	if(!IsPC()) {
+		width = "80%";
+		height = "95%";
+	}
+	layer.open({
+		type: 2,
+	    shade: [0.5, '#000'],
+	    fix: true,
+	    moveOut: true,
+	    moveType: 1,
+	    title:[title, 'font-weight:bold; font-size:15px;'],
+	    maxmin: true,
+	    scrollbar: true,
+	    shadeClose: shadeClose,
+	    area: [width , height],
+	    content: url
+	});
+}
+//判断是否PC
+function IsPC() {
+    var userAgentInfo = navigator.userAgent;
+    var Agents = ["Android", "iPhone",
+                "SymbianOS", "Windows Phone",
+                "iPad", "iPod"];
+    var flag = true;
+    for (var v = 0; v < Agents.length; v++) {
+        if (userAgentInfo.indexOf(Agents[v]) > 0) {
+            flag = false;
+            break;
+        }
+    }
+    return flag;
+}
+
+//修改密码
+function modifyPwd() {
+	layerDialog("修改密码","<{:Url('Index/editPwd')}>","50%","380px",true);
+}
+
+$(".ibox-search-box").find(":text").keyup(function() {
+	enableTitle($(this));
+})
+$(".ibox-search-box").find(":text").blur(function() {
+	enableTitle($(this));
+})
+$(".ibox-search-box").find(":input").each(function() {
+	enableTitle($(this));
+})
+
+//显示隐藏title
+function enableTitle(t) {
+	if($(t).val() == "") {
+		$(t).parents(".infont").find("span").remove();
+		$(t).parents(".infont").find("span").fadeOut(200);
+	}else{
+		if($(t).parents(".infont").find("span").length == 0) {
+			$(t).parents(".infont").prepend('<span></span>');
+		}
+		$(t).parents(".infont").find("span").html($(t).attr("placeholder"));
+		$(t).parents(".infont").find("span").fadeIn(200);
+	}
+}
+/**
+ *  加载图片失败，加载默认图片
+ */
+function showImgDelay(imgObj, imgSrc, maxErrorNum) {
+	if (maxErrorNum > 0) {
+		imgObj.onerror = function() {
+			showImgDelay(imgObj, imgSrc, maxErrorNum - 1);
+		};
+		setTimeout(function() {
+			imgObj.src = imgSrc;
+		}, 500);
+	} else {
+		imgObj.onerror = null;
+		// 为了防止出现错误时的图片也加载失败，此处加载一个本地的图片
+		imgObj.src = "/static/hplus/img/back_img.png";
+	}
+}
+$(function(){
+	//当前点击菜单高亮
+	$("ul.nav-second-level li a").click(function(){
+		var html = $(this).html();
+		$(".nav-second-level li a",window.top.document).each(function(item,t){
+			$(t).parent().removeClass('active');
+			if(html == $(t).html()){
+				$(t).parent().addClass('active');
+			}
+		})
+	})
+	
+	//绑定标签栏右键事件
+	$(".page-tabs").contextPopup({
+        contextMenuClass: 'dropdown-menu dropdown-menu-left',
+		headerClass: 'header',
+		seperatorClass: 'divider',
+        items: [
+		  {label:'定位当前选项卡', c_class:'', icon:'', action:function(){$(".J_tabShowActive").click()} },
+          null, // 分割线
+          {label:'关闭全部选项卡', c_class:'', icon:'', action:function(){$(".J_tabCloseAll").click()} },
+          {label:'关闭其他选项卡', c_class:'', icon:'', action:function(){$(".J_tabCloseOther").click()} },
+        ]
+      });
+	//全屏展示
+	if($.support.fullscreen){
+		$('#fullScreen').click(function(e){
+			$('#wrapper').fullScreen();
+		});
+	}
+	//加载提示
+	$("[data-toggle='tooltip']").tooltip();
+	
+	//图片加载失败加载默认图片
+	$('img').error(function(){
+	    showImgDelay(this, '/static/hplus/img/back_img.png', 2);
+	});
+	
+	//头像编辑
+  	$(".editHeader").click(function () {
+		$(".uploadHeader").click();
+  	});
+	
+	//点击上传头像
+	$(document).on('click','.submitPhoto', function () {
+		$(".cutHeader").removeClass("hidden");
+		var newImgUrl = document.getElementById("canvas").toDataURL("image/png");
+		$.ajax({
+			url : "<{:url('System/uploadImgHead')}>",
+			type : "POST",
+			data : { imgPath : newImgUrl },
+			success : function(data) {
+				if (data.status === 1) {
+					$(".cutHeader").attr("src","__IMGROOT__" + data.data);
+					$("input[name='headimg']").val(data.data);
+				} else {
+					layer.msg(data.info);
+				}
+			}
+		});
+		layer.closeAll();
+	});
+});
+/**
+ * 上传头像
+ */
+function editPhoto(imgUrl) {
+	if (imgUrl !== "") {
+		var index = layer.open({
+			type: 1,
+			skin: 'layui-layer-demo',
+			//样式类名
+			area: ['40%', '400px'],
+			title: null,
+			anim: 2,
+			shadeClose: true,
+			content: '<div style="width: 60%;height: 100%;"><img id="image" src=' + imgUrl + ' /></div>' + '<div id="cutPhoto" class="img-preview"><canvas id="canvas" style="height: 140px;width: 140px">你的浏览器居然不支持Canvas？！赶快换一个吧！！ </canvas></div>' + '<span class="headerSize">头像尺寸，140x140像素</span>' + '<div class="saveCutPhoto"><button class="submitPhoto">提交</button></div>',
+			success: function() {
+				var options = {
+					background: false,
+					preview: ".img-preview",
+					//          resizable: false,
+					aspectRatio: 1,
+					dragCrop: false,
+					autoCropArea: 1,
+					zoomable: false,
+					crop: function(data) {
+						
+					}
+				};
+				$('#image').cropper({
+					background: false,
+					preview: ".img-preview",
+					aspectRatio: 1,
+					dragCrop: false,
+					autoCropArea: 1,
+					zoomable: false,
+					crop: function(data) {
+						var canvas = document.getElementById("canvas");
+						canvas.width = data.width;
+						canvas.height = data.height;
+						var context = canvas.getContext("2d");
+						var img = new Image();
+						img.src = imgUrl;
+						img.onload = function() {
+							context.drawImage(img, data.x, data.y, data.width, data.height, 0, 0, data.width, data.height);
+						};
+					}
+				});
+			}
+		});
+	}
+
+}
+/**
+ * 返回路径
+ */
+function getPhotoUrl(node) {
+	var imgUrl = "";
+	var _thisFile = '<input type="file" class="hidden uploadHeader" accept="image/gif,image/jpeg,image/jpg,image/png" onchange="getPhotoUrl(this)"/>';
+	try {
+		var file = null;
+		if (node.files && node.files[0]) {
+			file = node.files[0];
+		} else if (node.files && node.files.item(0)) {
+			file = node.files.item(0);
+		}
+		try {
+			imgUrl = file.getAsDataUrl(file);
+		} catch(e) {
+			imgUrl = window.URL.createObjectURL(file);
+		}
+	} catch(e) {
+		if (node.files && node.files[0]) {
+			var reader = new FileReader();
+			reader.onload = function(e) {
+				imgUrl = e.target.result;
+			};
+			reader.readAsDataURL(node.files[0]);
+		}
+	}
+	$(".headerInfo>input").remove();
+	$(".headerInfo").append(_thisFile);
+	editPhoto(imgUrl);
+}
+</script>

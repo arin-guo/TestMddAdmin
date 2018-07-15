@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+<head>
+<include file="public:header" />
+<!-- jqgrid-->
+<link href="__HPLUS__/css/plugins/jqgrid/ui.jqgrid.css?0820" rel="stylesheet">
+<link href="__HPLUS__/js/plugins/fancybox/jquery.fancybox.css" rel="stylesheet">
+</head>
+
+<body class="gray-bg">
+    <div class="wrapper wrapper-content animated fadeInRight">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="ibox ">
+                    <div class="ibox-content">
+                    	<div class="ibox-search-box">
+                    		<div class="row">
+                                <div class="infont col-md-2">
+                                    <input type="text" name="realname" class="form-control" placeholder="主家长姓名">
+                                </div>
+                                <div class="infont col-md-2">
+                                    <input type="text" name="tel" class="form-control" placeholder="主家长手机号">
+                                </div>
+	                    		<div class="infont col-md-2">
+		                    		<select class="form-control" name="status" placeholder="主家长状态">
+										<option value="1">正常</option>
+                                        <option value="-1">毕业</option>
+                                        <option value="-2">离校</option>
+									</select>
+								</div>
+								<div class="infont col-md-2">
+	                    			<button class="btn btn-success btn-block btn-ibox-search" type="button">搜索</button>
+	                    		</div>
+                    		</div>
+                    	</div>
+                    	<p>
+                            <button type="button" id="add" class="btn btn-white btn-sm btn-outline"><i class="fa fa-plus-square-o"></i>&nbsp;新增主家长</button>
+                    		<button type="button" id="edit" class="btn btn-white btn-sm btn-outline"><i class="fa fa-table"></i>&nbsp;修改主家长信息</button>
+                            <button type="button" id="childInfo" class="btn btn-white btn-sm btn-outline"><i class="fa fa-child"></i>&nbsp;孩子信息</button>
+                            <button type="button" id="cParentInfo" class="btn btn-white btn-sm btn-outline"><i class="fa fa-male"></i>&nbsp;从属家长信息</button>
+                            <button type="button" id="export" class="btn btn-white btn-sm btn-outline"><i class="fa fa-file-excel-o"></i>&nbsp;导出excel</button>
+                    	</p>
+                        <div class="jqGrid_wrapper">
+                            <table id="table_list"></table>
+                            <div id="pager_list"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<!-- 全局js -->
+<include file="public:foot" />
+<!-- jqGrid -->
+<script src="__HPLUS__/js/plugins/jqgrid/i18n/grid.locale-cn.js?0820"></script>
+<script src="__HPLUS__/js/plugins/jqgrid/jquery.jqGrid.min.js?0820"></script>
+<script src="__HPLUS__/js/plugins/fancybox/jquery.fancybox.js"></script>
+<!-- Page-Level Scripts -->
+<script>
+$(document).ready(function () {
+	//图片全屏加载
+	$(".fancybox").fancybox({openEffect:"none",closeEffect:"none"});
+	//初始化
+    $.jgrid.defaults.styleUI = 'Bootstrap';
+    $("#table_list").jqGrid({
+    	url : '__URL__/getAllData',
+    	datatype: "json",
+        height: 580,
+        autowidth: true,
+        shrinkToFit: true,
+        rowNum: 15,
+        rowList: [10, 15, 30, 50],
+        colNames: ['姓名','手机号','照片','识别码','状态','操作'],
+        colModel: [ {name : 'realname',index : 'realname'},
+	                {name : 'tel',index : 'tel'},
+	                {name : 'photo',index : 'photo',formatter : function(cellvalue, options, rowObject){
+                         var content = "";
+                         if(cellvalue != null && cellvalue.length != 0 && cellvalue != "" ){
+                            content = '<a class="fancybox" href="__IMGROOT__'+cellvalue+'"><img alt="点击放大" src="__IMGROOT__'+cellvalue+'" style="width:50px;"></a>';
+                         }else{
+                            content="暂无";
+                         }
+                         return content;
+                     },sortable:false},
+                    {name : 'unique_code',index : 'unique_code'},
+                    {name : 'status',index : 'status',formatter : function(cellvalue, options, rowObject){
+                         var content ="";
+                         if(cellvalue == 1) {
+                            content = '<font color="green">正常</font>';
+                         }else if(cellvalue == -1) {
+                            content = '<font color="red">毕业</font>';
+                         }else if(cellvalue == -2){
+                            content = '<font color="blue">离校</font>';
+                         }
+                        return content;
+                    },sortable:false},
+                    {name : 'status',index : 'status',formatter : function(cellvalue, options, rowObject){
+                        var  content = '<button class="btn btn-danger btn-xs btn-outline" onclick="del('+rowObject.id+','+"'"+rowObject.realname+"'"+')"><i class="fa fa-trash-o"></i>  删除</button>';
+                        content += '&nbsp;';
+                        content += '<button class="btn btn-primary btn-xs btn-outline" onclick="detail('+rowObject.id+')"><i class="fa fa-building"></i>  详情</button>';
+                        return content;
+                    },sortable:false}
+        		],
+        pager: "#pager_list",
+        viewrecords: true,
+        hidegrid: false,
+        sortname: "id",
+        sortorder: "desc",
+        ondblClickRow: function(rowid) {
+        	if(rowid != null) {
+        		layerDialog("详细",'__URL__/detailView?id='+rowid,"90%","90%",true);
+        	}else {
+        		layer.msg("您没有选取数据！");
+        	}
+        }
+    });
+
+ 	// 设置按钮
+    $("#table_list").jqGrid('navGrid', '#pager_list', {
+        edit: false,
+        add: false,
+        del: false,
+        search: false
+    }, {
+        height: 200,
+        reloadAfterSubmit: true
+    });
+    // 添加适配响应
+    $(window).bind('resize', function () {
+        var width = $('.jqGrid_wrapper').width();
+        $('#table_list').setGridWidth(width);
+    });
+  	//搜索
+    $(".btn-ibox-search").click(function() {
+    	result = getSearchParamByInput();
+    	$("#table_list").jqGrid('setGridParam', {
+    		page: 1,
+    		url : '__URL__/getAllData' + result
+    	}).trigger("reloadGrid");
+    })
+    //监控回车
+    $(".ibox-search-box").find(":input").keydown(function(event) {
+		if(event.keyCode == 13){
+			$(".btn-ibox-search").trigger("click");
+		}
+	})
+    //获取搜索条件（仅限封装简单条件）
+    function getSearchParamByInput() {
+    	var result = "";
+    	$(".ibox-search-box").find(":input").each(function() {
+    		if($(this).val() != "") {
+    			if(result != "") {
+    				result += "&";
+    			}else{
+    				result += "?";
+    			}
+    			result += $(this).attr("name") + "=" + $(this).val();
+    		}
+    	})
+    	return result;
+    }
+    //增主家长
+    $("#add").click(function() {
+        layerDialog("添加",'__URL__/add?type='+$("#type").val(),"90%","90%",true);
+    })
+    //改
+    $("#edit").click(function() {
+        var id = $("#table_list").jqGrid('getGridParam','selrow');
+        if(id != null) {
+            layerDialog("修改",'__URL__/edit?id='+id+'&type='+$("#type").val(),"90%","80%",true);
+        }else {
+            layer.msg("您没有选取数据！");
+        }
+    })
+    //孩子信息
+    $("#childInfo").click(function() {
+    	var id = $("#table_list").jqGrid('getGridParam','selrow');
+        if(id != null) {
+        	layerDialog("孩子信息",'__URL__/childInfo?id='+id,"90%","90%",true);
+        }else {
+            layer.msg("您没有选取数据！");
+        }
+    })
+    //从属家长信息
+    $("#cParentInfo").click(function() {
+        var id = $("#table_list").jqGrid('getGridParam','selrow');
+        if(id != null) {
+            layerDialog("从属家长信息",'__URL__/cParentInfo?id='+id,"90%","90%",true);
+        }else {
+            layer.msg("您没有选取数据！");
+        }
+    })
+    //重置密码
+     $("#reset").click(function() {
+        var id = $("#table_list").jqGrid('getGridParam','selrow');
+        if(id != null) {
+            resetPwd(id);
+        }else {
+            layer.msg("您没有选取数据！");
+        }
+    })
+    //导出excel
+    $("#export").click(function() {
+        layerDialog("导出家长信息",'__URL__/export?id=',"80%","75%",true);
+    })
+});
+
+function detail(id){
+	layerDialog("详细","__URL__/detailView?id="+id,"90%","90%",true)
+}
+
+// function resetPwd(id) {
+//     layer.confirm('密码将重置为 <font style="color:red;">000000</font></br>确定执行？', function(index){
+//         var index = layer.load(2);
+//         $.ajax({
+//             url:"__URL__/updateStatus",
+//             type:"post",
+//             data:{'id':id,'field':'password','value':"670b14728ad9902aecba32e22fa4f6bd"},
+//             success:function(data){
+//                 if(data.status == 1){
+//                     layer.msg(data.info);
+//                     $('#table_list').trigger("reloadGrid");
+//                 }else{
+//                     layer.msg(data.info);
+//                 }
+//                 layer.close(index);
+//             }
+//         })
+//     });
+// }
+//删除状态家长账号与孩子信息
+function del(id,name){
+    layer.confirm('家长<b>'+name+'</b>及<b>从属家长</b>的账号和<b>孩子信息</b>将删除。<br><font color="red">删除后信息无法恢复！！！</font><br>确定删除？', function(index){
+        var index = layer.load(2);
+        $.ajax({
+            url:"__URL__/logicDel",
+            type:"post",
+            data:{'id':id},
+            success:function(data){
+                if(data.status == 1){
+                    layer.msg(data.info);
+                    $('#table_list').trigger("reloadGrid");
+                }else{
+                    layer.msg(data.info);
+                }
+                layer.close(index);
+            }
+        })
+    });
+}
+</script>
+</html>

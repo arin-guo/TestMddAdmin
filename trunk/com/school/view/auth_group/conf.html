@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <include file="public:header" />
+    <style>
+    	.dd-handle-btn{ position:absolute; right:10px; top:5px;}
+    	.dd-handle-btn label{  font-weight:normal;}
+    	#nestable ol li.dd-item .dd-handle{ background:#e6e6e6; font-weight:bold; height:35px; border-top:1px solid #dddddd; border-left:1px solid #dddddd; border-right:1px solid #dddddd; border-bottom:0; margin:0; border-radius:0; cursor:auto;}
+    	#nestable ol li.dd-item .panel-body{ padding:10px;}
+    	#nestable ol li.dd-item .panel-body span{ display:inline; padding:0 10px; line-height:24px;}
+    	.dd-handle-btn button{ margin:4px 4px 0 0;}
+    	.main-panel{ border-radius:0; margin-top:-6px;}
+    	.sub-panel{ margin-bottom:0;}
+    	.sub-panel .panel-heading{  background:#fafafa; position:relative; border-bottom:0;}
+    	.sub-panel .panel-heading a{ margin-left:5px;}
+    	.sub-panel .panel-heading .sub-panel-menu-box{ position:absolute; top:10px; right:8px;}
+    	.panel-body{ padding:1px 0;}
+    	.right{ float:right;}
+    	.dd-list li{ padding-bottom:1px;}
+    	.sub-panel .panel-body{ overflow:hidden;}
+    	.sub-panel .panel-body .row div{ border-left:1px solid #ddd; margin:5px 0;}
+    	.sub-panel .panel-body .row div font{ color:#444;}
+    	.sub-panel .panel-body .row div a{ color:#999;}
+    </style>
+</head>
+<body class="gray-bg">
+    <div class="wrapper wrapper-content animated fadeInRight">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="ibox ">
+                    <div class="ibox-title">
+                        <h5>权限节点</h5>
+                    </div>
+                    <div class="ibox-content">
+                    	<input type="hidden" id="id" value="<{$id}>"/>
+	                    <div class="dd" id="nestable">
+	                        <ol class="dd-list">
+	                        	<foreach name="vo" item="vo">
+	                        		<li class="dd-item" ref="<{$vo.id}>" data-id="<{$key+1}>">
+		                            	<div class="dd-handle"><{$vo.title}></div>
+		                            	<div class="panel panel-default main-panel">
+			                                <div class="dd-handle-btn">
+									            <label>
+									            	<input type="checkbox" name="rules" value="<{$vo.id}>" class="main-menu-checkbox"> 全/反选
+									            </label>
+			                                </div>
+			                                <div class="main-module-panel">
+				                                <foreach name="vo['sub_menu']" item="vo2">
+				                                	<div class="panel-body sub-panel-body">
+					                                	<div class="panel panel-default sub-panel">
+						                                    <div class="panel-heading">
+						                                    	<div class=" left">
+						                                    		<label>
+														             	<input type="checkbox" <if condition="$vo2.isCheck eq 0">checked='checked'</if> value="<{$vo2.id}>" name="rules" class="sub-menu-checkbox"> &nbsp;<{$vo2.title}>
+														            </label>
+						                                    	</div>
+						                                    </div>
+						                                </div>
+					                                </div>
+				                                </foreach>
+			                                </div>
+		                                </div>
+		                            </li>
+								</foreach>
+	                        </ol>
+	                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="footer-bar">
+    	<div class="clearfix">
+			<button type="button" id="submit-btn" class="btn btn-success btn-block">提交</button>
+		</div>
+    </div>
+</body>
+<!-- 全局js -->
+<include file="public:foot" />
+<script>
+$(function() {
+	$("#submit-btn").click(function() {
+		var rules = "";
+		$("input:checkbox[name=rules]:checked").each(function(index) {
+			if(index == 0) {
+				rules += $(this).val();
+			}else{
+				rules += "," + $(this).val();
+			}
+		})
+		var index = layer.load(2);
+		$.ajax({
+			url:"__URL__/update",
+			type:"post",
+			data:{'id':$("#id").val(),'rules':rules},
+			success:function(data){
+				if(data.status == 1){
+					parent.layer.msg(data.info);
+				}else{
+					parent.layer.msg(data.info);
+				}
+				var index = parent.layer.getFrameIndex(window.name);
+				parent.layer.close(index);
+				layer.close(index);
+			}
+		})
+	})
+	//初始化
+	initCheckbox();
+	$(".main-menu-checkbox").change(function() {
+		var arr = $(this).parents("li").find("input:checkbox[name=rules]");
+		changeCheckbox(arr,$(this));
+	})
+	$(".sub-menu-checkbox").change(function() {
+		var arr = $(this).parents(".sub-panel").find("input:checkbox[name=rules]");
+		changeCheckbox(arr,$(this));
+	})
+	//全反选
+	function changeCheckbox(obj,t) {
+		var flag = true;
+		if($(t).is(":checked")) {
+			flag = true;
+		}else{
+			flag = false;
+		}
+		for(var i=0; i<obj.length; i++){
+			$(obj)[i].checked = flag;
+		}
+	}
+	$("input:checkbox").change(function() {
+		initCheckbox();
+	})
+	//初始化Checkbox
+	function initCheckbox() {
+		$(".dd-item").each(function() {
+			var obj = $(this).find(".main-module-panel").find("input:checkbox[name=rules]");
+			var t = $(this).find(".dd-handle-btn").find(".main-menu-checkbox");
+			isSingleCheck(obj,t);
+		})
+	}
+	
+	//判断是否选中
+	function isCheck(obj,t) {
+		var flag = true;
+		$(obj).each(function(i) {
+			if(!$(this).is(":checked")) {
+				flag = false;
+			}
+		})
+		if(flag){
+			$(t)[0].checked = true;
+		}else{
+			$(t)[0].checked = false;
+		}
+	}
+	//判断单个子元素勾选便选中
+	function isSingleCheck(obj,t) {
+		var flag = false;
+		$(obj).each(function(i) {
+			if($(this).is(":checked")) {
+				flag = true;
+			}
+		})
+		if(flag){
+			$(t)[0].checked = true;
+		}else{
+			$(t)[0].checked = false;
+		}
+	}
+})
+</script>
+</html>

@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html>
+<head>
+<include file="public:header" />
+<!-- jqgrid-->
+<link href="__HPLUS__/css/plugins/jqgrid/ui.jqgrid.css?0820" rel="stylesheet">
+<link href="__HPLUS__/js/plugins/fancybox/jquery.fancybox.css" rel="stylesheet">
+<style type="text/css">
+.agile-list .has_class{
+	background: #fbf9ee;
+}
+</style>
+</head>
+
+<body class="gray-bg">
+    <div class="wrapper wrapper-content  animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-5">
+            <div class="ibox">
+                <div class="ibox-content">
+                    <h3>等待分班学生列表</h3>
+                    <p class="small"><i class="fa fa-hand-o-up"></i> 在列表之间拖动学生</p>
+                    <hr/>
+                    <div class="row">
+                    	<div class="col-sm-2">
+		                    <button type="button" class="btn btn-white btn-sm" id='checkAll'>全选/反选</button>
+	                    </div>
+                    	<div class="col-sm-10">
+                    		<!-- <div class="input-group">
+		                        <input type="text" placeholder="学生姓名" class="inputs form-control">
+		                        <span class="input-group-btn">
+		                       		<button type="button" class="btn btn-white">搜索</button>
+		                    	</span>
+                    		</div> -->
+                    		<span id="bl" style="color: red;float: right;font-size: 14px;" ></span><span style="float: right;">男女比例：</span>
+                    		
+                   		</div>
+                   	</div>
+                    <ul class="sortable-list connectList agile-list" id="left" style="">
+                    	<foreach item="data" name="data">
+                    		<li class="<eq name='data.sex' value='1'>info-element<else/>danger-element</eq>" id="<{$data.id}>">
+                        		<input type="checkbox" class="i-checks" checked>
+                        		<{$data.realname}><a href="#" class="pull-right btn btn-xs btn-white"><eq name='data.sex' value='1'>男<else/>女</eq></a>
+                        		<a href="#" class="pull-right btn btn-xs btn-white">学号<{$data.code}></a>
+                        	</li>
+                    	</foreach>
+                    </ul>
+                    <div class="clearfix"></div>
+                    <br/>
+                    <p style="padding-top: 20px;"></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-2">
+        	<div class="ibox">
+                <div class="ibox-content">
+               		<div class="col-sm-12">
+               			<span>班级类型:</span>
+	                    <select name="" class="form-control" placeholder="班级类型" id="type">
+	                    	<foreach item="vo" name="vo">
+	                    		<option value="<{$vo.subtype_code}>"><{$vo.subtype_name}></option>
+	                    	</foreach>
+	                    </select>
+                    </div>
+                    <div class="clearfix"></div><br/>
+                    <div class="col-sm-12">
+                    	<span>班级名称:</span>
+	                    <select name="" class="form-control"  placeholder="班级名称" id="subtype">
+	                    	
+	                    </select>
+                    </div>
+                    <div class="clearfix"></div><br/>
+                    <div class="col-sm-12">
+	                    <span>班级人数:</span><input type="text" class="form-control" value="20" id="totalNum"/>
+                    </div>
+                    <div class="clearfix"></div><br/>
+                    <div class="alert alert-warning">
+                        	自动分班将按男女比例智能分配，分配后可手动调整，确定请点击右侧确认分班！
+                    </div>
+                     <div class="alert alert-danger">
+                        	请先选择班级，才可左右拖动！
+                    </div>
+                    <div class="clearfix">
+						<button type="button" id="auto" class="btn btn-success btn-block">自动分班</button>
+					</div>
+					
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-5">
+            <div class="ibox">
+                <div class="ibox-content">
+                	<input type="hidden" value="0" id="class_id" />
+                   	<h3 class="bj_span">请先选择班级</h3>
+                    <p class="small"><i class="fa fa-hand-o-up"></i> 在列表之间拖动学生</p>
+                    <hr/>
+                    <div class="row">
+                    	<div class="col-sm-12">
+                    		<span id="rbl" style="color: red;float: right;font-size: 14px;" ></span><span style="float: right;">男女比例：</span>
+                   		</div>
+                   	</div>
+                    <ul class="sortable-list connectList agile-list" id="right" style="min-height: 240px;">
+                    	
+                    </ul>
+                    <br/>
+                    <div class="clearfix">
+						<button type="button" id="doneClass" class="btn btn-success btn-block">确认分班</button>
+					</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+</body>
+<!-- 全局js -->
+<include file="public:foot" />
+<script src="__HPLUS__/js/jquery-ui-1.10.4.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+	$("ul").css('height',($(document.body).height()-250)+"px");
+	$("ul").css('overflow-y','scroll');
+	
+    $(".sortable-list").sortable({connectWith: ".connectList"}).disableSelection();
+    $(".sortable-list").sortable({disabled: true});
+    $(".sortable-list").on("sortstart",function(event,ui) {
+    	if($(ui.item).parent('ul').attr('id') == 'right'){
+    		layer.msg("拖拽完成将设置为无班级状态,谨慎操作！！！");
+    	}
+    });
+    $(".sortable-list").on("sortreceive",function(event,ui) {
+    	//从右边拉到左边
+    	if($(ui.sender).attr('id') == 'right'){
+    		$.ajax({
+        		url:"__URL__/setClildClassId",
+        		type:"post",
+        		data:{ids:$(ui.item).attr('id'),classId:0},
+        		success:function(data){
+        			if(data.status == 1){
+        				layer.msg("操作成功！");
+        				//重新计算比例
+                	    computeBl();
+        			}else{
+        				layer.msg("系统繁忙！");
+        			}
+        		}
+        	})
+    	}
+    });
+    //重新计算比例
+    computeBl();
+    //自动分班
+    $("#auto").click(function(){
+    	//判断是否已经选择班级
+    	var bj = $('#subtype option:selected').val();
+    	if(bj == ""){
+    		layer.msg("请先选择班级！");
+    		return false;
+    	}
+    	//判断是否有可分配的学生
+    	if($("#left li").length == 0){
+    		layer.msg("暂无可分配的学生！");
+    		return false;
+    	}
+    	//男女生比例
+    	var total_boy = parseInt($("#left li.info-element").length);
+    	var total_gril = parseInt($("#left li.danger-element").length);
+    	//如果分母为0
+    	if(total_gril == 0){
+    		var bl = total_boy;
+    	}else{
+    		var bl = total_boy/total_gril;
+    	}
+    	//获取目标班级人数
+    	var totalNum = $("#totalNum").val() - $("#right li").length;
+		if(totalNum == 0){
+			layer.msg('请先选择班级人数！');
+		}
+    	var boy_num = totalNum/(bl+1);
+    	boy_num = parseInt(boy_num * bl);
+    	var girl_num = totalNum - boy_num;
+    	//询问框
+    	layer.confirm('自动分班将按照'+boy_num+'男'+girl_num+'女的比例分配，确定执行？',function(){
+        	totalNum = totalNum - $("#right li").length;
+        	var b=0,g=0;
+        	$("#left li").each(function(i,t){
+        		if($(t).find('.i-checks').is(':checked')){
+        			if($(t).is('.info-element')){//男
+        				if(b < boy_num){
+            				var html = $(t).prop("outerHTML");
+                    		$(t).remove();
+                    		$("#right").append(html);
+                    		b ++;
+            			}
+        			}else if($(t).is('.danger-element')){//女
+        				if(g < girl_num){
+            				var html = $(t).prop("outerHTML");
+                    		$(t).remove();
+                    		$("#right").append(html);
+                    		g ++;
+            			}
+        			}
+        		}
+        	})
+        	layer.msg('分班完成！');
+    	});
+    })
+    
+    //全选、反选
+    $("#checkAll").click(function(){
+    	var bool = false;
+    	 $("#left .i-checks").each(function(index,ele) {
+    		 if(index == 0){
+    			 if($(ele).is(':checked')){bool = true;}
+    		 }
+    		 if(bool){
+				 $(ele).prop("checked", false); 
+			 }else{
+				 $(ele).prop("checked", true); 
+			 }
+         }); 
+    })
+    //班级人数必须为整数
+    $("#totalNum").blur(function(){
+        var value = $(this).val();
+        if((/^(\+|-)?\d+$/.test( value )) && value > 0){
+        	
+        }else{  
+            layer.msg("请输入正整数！");  
+            $("#totalNum").val("20");  
+        } 
+    });
+    
+    //班级联动
+    $("#type").change(function(){
+    	$("#subtype").empty();
+    	$.ajax({
+    		url:"__URL__/getClassByCatscode",
+    		type:"post",
+    		data:{cats_code:$(this).find('option:selected').val()},
+    		success:function(data){
+    			if(data.status == 1){
+    				data = data.data;
+    				$("#subtype").append("<option value=''>请选择</option>");  
+    				for(var i = 0; i < data.length; i++){
+	    				$("#subtype").append("<option value='"+data[i].id+"'>"+data[i].name+"</option>");  
+    				}
+    				$("#subtype").change();
+    				//重新计算比例
+            	    computeBl();
+    			}else{
+    				layer.msg("系统繁忙！");
+    			}
+    		}
+    	})
+    });
+    $("#subtype").change(function(){
+    	var html = $("#type option:selected").text()+" -- "+$('#subtype option:selected').text();
+    	var class_id = $(this).find("option:selected").val();
+    	if(class_id == ""){
+    		html = "请先选择班级";
+    		class_id = "0";
+    	}
+    	$(".bj_span").html(html);
+    	$("#right").empty();
+    	$("#class_id").val(class_id);
+    	if(class_id == 0){
+    		$(".sortable-list").sortable({disabled: true});
+    		return false;
+    	}
+    	$(".sortable-list").sortable({disabled: false});
+    	//获取班级的ID获取已分班学生
+    	$.ajax({
+    		url:"__URL__/getChildByClassId",
+    		type:"post",
+    		data:{class_id:class_id},
+    		success:function(data){
+    			if(data.status == 1){
+    				data = data.data;
+    				for(var i = 0; i < data.length; i++){
+    					var arr = new Array();
+    					if(data[i].sex == 1){
+    						var arr = new Array('info-element','男');
+    					}else{
+    						var arr = new Array('danger-element','女');
+    					}
+    					var html = '<li class="'+arr[0]+' has_class" id="'+data[i].id+'">';
+    					html += '<input type="checkbox" class="i-checks" checked />&nbsp;';
+    					html += data[i].realname;
+    					html += '<a href="#" class="pull-right btn btn-xs btn-white">'+arr[1]+'</a>';
+    					html += '<a href="#" class="pull-right btn btn-xs btn-white">学号'+data[i].code+'</a></li>';
+	    				$("#right").append(html);  
+	    				//重新计算比例
+	            	    computeBl();
+    				}
+    				layer.msg("班级学生加载完毕！");
+    			}else{
+    				layer.msg("系统繁忙！");
+    			}
+    		}
+    	})
+    })
+    $("#type").change();
+    //确定分班
+    $("#doneClass").click(function(){
+    	var ids = $("#right").sortable('toArray');
+    	ids = ids.join(",");
+    	$.ajax({
+    		url:"__URL__/setClildClassId",
+    		type:"post",
+    		data:{ids:ids,classId:$("#class_id").val()},
+    		success:function(data){
+    			if(data.status == 1){
+    				layer.msg("操作成功！");
+    				//重新计算比例
+            	    computeBl();
+    			}else{
+    				layer.msg("系统繁忙！");
+    			}
+    		}
+    	})
+    })
+});
+
+function computeBl(){
+	//左边
+	var total_boy1 = parseInt($("#left li.info-element").length);
+	var total_gril1 = parseInt($("#left li.danger-element").length);
+	//如果分母为0
+	if(total_gril1 == 0){
+		var blhtml = total_boy1+":"+0;
+	}else{
+		var blhtml = total_boy1+":"+total_gril1;
+	}
+	$("#bl").html(blhtml);
+	//右边
+	var total_boy3 = parseInt($("#right li.info-element").length);
+	var total_gril3 = parseInt($("#right li.danger-element").length);
+	//如果分母为0
+	if(total_gril3 == 0){
+		var blhtml2 = total_boy3+":"+0;
+	}else{
+		var blhtml2 = total_boy3+":"+total_gril3;
+	}
+	$("#rbl").html(blhtml2);
+}
+</script>
+</html>

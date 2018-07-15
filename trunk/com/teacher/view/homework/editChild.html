@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<include file="public:header" />
+<link href="__HPLUS__/css/dialog.css" rel="stylesheet">
+<link href="__HPLUS__/js/plugins/fancybox/jquery.fancybox.css" rel="stylesheet">
+<link href="__HPLUS__/css/plugins/validform/validform.css" rel="stylesheet">
+<link href="__HPLUS__/js/plugins/uploadImg/upload.css" rel="stylesheet">
+<link href="__HPLUS__/js/plugins/fancybox/jquery.fancybox.css" rel="stylesheet">
+<style>
+	.form-control{ padding-left:5px;}
+</style>
+  <body>
+	  <div class="wrapper wrapper-content animated fadeInRight">
+		<form role="form" class="form" action="__URL__/updateChildWork">
+			<input type="hidden" name="id" value="<{$vo.id}>">
+			<input type="hidden" name="status" value="2">
+			<div class="form-group">
+				<label class="col-sm-2 control-label">学生姓名：</label>
+				<div class="col-sm-10">
+					<input type="text" disabled name="title" class="form-control" placeholder="输入作业标题" value="<{$vo.realname}>">
+				</div>
+			</div>
+			<div class="clearfix"></div><br>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">作业标题：</label>
+				<div class="col-sm-10">
+					<input type="text" disabled name="title" class="form-control" placeholder="输入作业标题" value="<{$vo.title}>">
+				</div>
+			</div>
+			<div class="clearfix"></div><br>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">作业内容：</label>
+				<div class="col-sm-10">
+					<input type="text" name="task_content" class="form-control" placeholder="输入作业内容" value="<{$vo.task_content}>">
+				</div>
+			</div>
+			<div class="clearfix"></div><br>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">附图：</label>
+				<div class="col-sm-10">
+					<if condition="$vo.task_img neq ''">
+	  				<foreach name="homeworkimg" item="hwimg">
+  							<a class="fancybox" href="__IMGROOT__<{$hwimg}>"><img alt="点击放大" src="__IMGROOT__<{$hwimg}>" style="width:100px;"></a>
+					</foreach>
+					<else />
+					暂无图片
+					</if>
+				</div>
+			</div>
+			<div class="clearfix"></div><br>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">评价星级：</label>
+				<div class="col-sm-10">
+					<div id="star"></div>
+					<input type="hidden" name="eval_star" class="form-control" placeholder="输入评价星级" value="<{$vo.eval_star}>">
+				</div>
+			</div>
+			<div class="clearfix"></div><br>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">评价内容：</label>
+				<div class="col-sm-10">
+					<input type="text" name="eval" class="form-control" placeholder="输入评价内容" value="<{$vo.eval}>">
+				</div>
+			</div>
+			<div class="clearfix"></div><br>
+			<div class="clearfix">
+				<button type="submit" id="submit" class="btn btn-success btn-block">提交</button>
+				<button type="reset" id="reset2" class="hidden btn btn-success btn-block">重置</button>
+			</div>
+		</form>
+	  </div>
+  </body>
+<!-- 全局js -->
+<include file="public:foot" />
+<script src="__HPLUS__/js/plugins/fancybox/jquery.fancybox.js"></script>
+<script src="__HPLUS__/js/plugins/validform/Validform_v5.3.2_min.js"></script>
+<script src="__HPLUS__/js/jquery.md5.js"></script>
+<script type="text/javascript" src="__HPLUS__/js/plugins/uploadImg/jquery.upload.js"></script>
+<script src="__HPLUS__/js/plugins/fancybox/jquery.fancybox.js"></script>
+<!--raty评分插件-->
+<script type="text/javascript" src="__HPLUS__/js/plugins/ratyjs/jquery.raty.min.js"></script>
+<script type="text/javascript" src="__HPLUS__/js/plugins/ratyjs/jquery.raty.js"></script>
+<script>
+$(document).ready(function () {
+	//大图展示
+	$(".fancybox").fancybox({openEffect:"none",closeEffect:"none"});
+	//raty评分插件
+	$(function(){
+		var starscore = $('input[name="eval_star"]').val();
+		$('#star').raty({
+	        number: 5, //多少个星星设置
+	        score: starscore, //初始值是设置
+	        targetType: 'number', //类型选择，number是数字值
+	        cancelOff: '__HPLUS__/img/ratyimg/cancel-off-big.png',
+	        cancelOn: '__HPLUS__/img/ratyimg/cancel-on-big.png',
+	        size: 40,
+	        starHalf: '__HPLUS__/img/ratyimg/star-half-big.png',
+	        starOff: '__HPLUS__/img/ratyimg/star-off-big.png',
+	        starOn: '__HPLUS__/img/ratyimg/star-on-big.png',
+	        cancel: false,
+	        targetKeep: true,
+	        precision: false, //是否包含小数
+	        click: function(score, evt) {
+	            $('input[name="eval_star"]').attr('value',score);
+	        }
+	    });
+	});
+})
+
+$(function(){
+	$("#reset2").click();
+	var index = parent.layer.getFrameIndex(window.name);
+	var form = $(".form").Validform({
+		tiptype:4,
+		ajaxPost:true,
+		callback:function(data){
+			if(data.status == 1) {
+				window.parent.layer.msg(data.info);
+				window.parent.$('#table_list').trigger("reloadGrid");
+				parent.layer.close(index);
+			}else{
+				window.parent.layer.msg(data.info);
+			}
+		}
+	});
+})
+</script>
+</html>

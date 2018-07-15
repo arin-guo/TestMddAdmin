@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+<head>
+<include file="public:header" />
+<!-- jqgrid-->
+<link href="__HPLUS__/css/plugins/jqgrid/ui.jqgrid.css?0820" rel="stylesheet">
+<link href="__HPLUS__/js/plugins/fancybox/jquery.fancybox.css" rel="stylesheet">
+</head>
+
+<body class="gray-bg">
+    <div class="wrapper wrapper-content animated fadeInRight">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="ibox ">
+                    <div class="ibox-content">
+                    	<div class="ibox-search-box">
+                    		<div class="row">
+                                <div class="infont col-md-2">
+                                    <input type="text" name="realname" class="form-control" placeholder="教职工姓名">
+                                </div>
+                                <div class="infont col-md-2">
+                                    <input type="text" name="tel" class="form-control" placeholder="手机号">
+                                </div>
+	                    		<div class="infont col-md-2">
+		                    		<select class="form-control" name="is_job" placeholder="是否在职">
+										<option value="1">在职</option>
+                                        <option value="2">已离职</option>
+									</select>
+								</div>
+								<div class="infont col-md-2">
+	                    			<button class="btn btn-success btn-block btn-ibox-search" type="button">搜索</button>
+	                    		</div>
+                    		</div>
+                    	</div>
+                    	<p>
+                    		<button type="button" id="add" class="btn btn-white btn-sm btn-outline"><i class="fa fa-plus-square-o"></i>&nbsp;新增</button>
+                    		<button type="button" id="edit" class="btn btn-white btn-sm btn-outline"><i class="fa fa-table"></i>&nbsp;修改信息</button>
+                    		<button type="button" id="del" class="btn btn-white btn-sm btn-outline"><i class="fa fa-trash-o"></i>&nbsp;删除</button>
+                            <button type="button" id="reset" class="btn btn-white btn-sm btn-outline"><i class="fa fa-refresh"></i>&nbsp;重置密码</button>
+                    	</p>
+                        <div class="jqGrid_wrapper">
+                            <table id="table_list"></table>
+                            <div id="pager_list"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<!-- 全局js -->
+<include file="public:foot" />
+<!-- jqGrid -->
+<script src="__HPLUS__/js/plugins/jqgrid/i18n/grid.locale-cn.js?0820"></script>
+<script src="__HPLUS__/js/plugins/jqgrid/jquery.jqGrid.min.js?0820"></script>
+<script src="__HPLUS__/js/plugins/fancybox/jquery.fancybox.js"></script>
+<!-- Page-Level Scripts -->
+<script>
+$(document).ready(function () {
+	//图片全屏加载
+	$(".fancybox").fancybox({openEffect:"none",closeEffect:"none"});
+	//初始化
+    $.jgrid.defaults.styleUI = 'Bootstrap';
+    $("#table_list").jqGrid({
+    	url : '__URL__/getAllData',
+    	datatype: "json",
+        height: 580,
+        autowidth: true,
+        shrinkToFit: true,
+        rowNum: 15,
+        rowList: [10, 15, 30, 50],
+        colNames: ['ID','姓名','岗位','手机号','工号','照片','操作'],
+        colModel: [ {name : 'id',index : 'id'},
+                    {name : 'realname',index : 'realname'},
+	                {name : 'cats_name',index : 'cats_name'},
+	                {name : 'tel',index : 'tel'},
+	                {name : 'job_num',index : 'job_num'},
+	                {name : 'photo',index : 'photo',formatter : function(cellvalue, options, rowObject){
+                         var content = "";
+                         if(cellvalue != null && cellvalue.length != 0 && cellvalue != "" ){
+                            content = '<a class="fancybox" href="__IMGROOT__'+cellvalue+'"><img alt="点击放大" src="__IMGROOT__'+cellvalue+'" style="width:50px;"></a>';
+                         }else{
+                            content="暂无";
+                         }
+                         return content;
+                     },sortable:false},
+                    {name : 'is_job',index : 'is_job',formatter : function(cellvalue, options, rowObject){
+                         var content ="";
+                         if(cellvalue == 1) {
+                             content = '<button class="btn btn-danger btn-xs btn-outline" onclick="leave('+rowObject.id+','+"'"+rowObject.realname+"'"+')"><i class="fa fa-cog"></i>  设置离职</button>';
+                         }else if(cellvalue == 2) {
+                             content = '<label class="label label-danger">已离职</label>';
+                         }
+                        content += "&nbsp";
+                        content += '<button class="btn btn-primary btn-xs btn-outline" onclick="detail('+rowObject.id+')"><i class="fa fa-building"></i>  详情</button>';
+                        return content;
+                    },sortable:false}
+        		],
+        pager: "#pager_list",
+        viewrecords: true,
+        hidegrid: false,
+        sortname: "id",
+        sortorder: "desc",
+        ondblClickRow: function(rowid) {
+        	if(rowid != null) {
+        		layerDialog("详细",'__URL__/detailView?id='+rowid,"90%","90%",true);
+        	}else {
+        		layer.msg("您没有选取数据！");
+        	}
+        }
+    });
+
+ 	// 设置按钮
+    $("#table_list").jqGrid('navGrid', '#pager_list', {
+        edit: false,
+        add: false,
+        del: false,
+        search: false
+    }, {
+        height: 200,
+        reloadAfterSubmit: true
+    });
+    // 添加适配响应
+    $(window).bind('resize', function () {
+        var width = $('.jqGrid_wrapper').width();
+        $('#table_list').setGridWidth(width);
+    });
+  	//搜索
+    $(".btn-ibox-search").click(function() {
+    	result = getSearchParamByInput();
+    	$("#table_list").jqGrid('setGridParam', {
+    		page: 1,
+    		url : '__URL__/getAllData' + result
+    	}).trigger("reloadGrid");
+    })
+    //监控回车
+    $(".ibox-search-box").find(":input").keydown(function(event) {
+		if(event.keyCode == 13){
+			$(".btn-ibox-search").trigger("click");
+		}
+	})
+    //获取搜索条件（仅限封装简单条件）
+    function getSearchParamByInput() {
+    	var result = "";
+    	$(".ibox-search-box").find(":input").each(function() {
+    		if($(this).val() != "") {
+    			if(result != "") {
+    				result += "&";
+    			}else{
+    				result += "?";
+    			}
+    			result += $(this).attr("name") + "=" + $(this).val();
+    		}
+    	})
+    	return result;
+    }
+    
+    //增
+	$("#add").click(function() {
+		layerDialog("添加",'__URL__/add?type='+$("#type").val(),"90%","70%",true);
+	})
+    //改
+    $("#edit").click(function() {
+        var id = $("#table_list").jqGrid('getGridParam','selrow');
+        if(id != null) {
+            layerDialog("修改",'__URL__/edit?id='+id+'&type='+$("#type").val(),"90%","65%",true);
+        }else {
+            layer.msg("您没有选取数据！");
+        }
+    })
+	//删除
+    $("#del").click(function() {
+    	var id = $("#table_list").jqGrid('getGridParam','selrow');
+    	if(id != null) {
+    		layer.confirm('确认执行？', function(index){
+				$.ajax({
+					url:"__URL__/logicDel",
+					type:"post",
+					data:{'id':id},
+					success:function(data){
+						if(data.status == 1){
+							layer.msg(data.info);
+							$('#table_list').trigger("reloadGrid");
+						}else{
+							layer.msg(data.info);
+						}
+					}
+				})
+			    layer.close(index);
+			});
+    	}else {
+    		layer.msg("您没有选取数据！");
+    	}
+    })
+    
+    //重置密码
+     $("#reset").click(function() {
+        var id = $("#table_list").jqGrid('getGridParam','selrow');
+        if(id != null) {
+            resetPwd(id);
+        }else {
+            layer.msg("您没有选取数据！");
+        }
+    })
+});
+
+//员工离职
+function leave(id,name){
+    layer.confirm('<h3>'+name+'</h3>'+'<font color="red">确定离职？</font>', function(index){
+        var index = layer.load(2);
+        $.ajax({
+            url:"__URL__/teacherLeave",
+            type:"post",
+            data:{'id':id},
+            success:function(data){
+                if(data.status == 1){
+                    layer.msg(data.info);
+                    $('#table_list').trigger("reloadGrid");
+                }else{
+                    layer.msg(data.info);
+                }
+                layer.close(index);
+            }
+        })
+    });
+}
+
+function detail(id){
+	layerDialog("详细","__URL__/detailView?id="+id,"90%","90%",true)
+}
+//重置密码
+function resetPwd(id) {
+    layer.confirm('密码将重置为 <font style="color:red;">000000</font></br>确定执行？', function(index){
+        var index = layer.load(2);
+        $.ajax({
+            url:"__URL__/updateStatus",
+            type:"post",
+            data:{'id':id,'field':'password','value':"670b14728ad9902aecba32e22fa4f6bd"},
+            success:function(data){
+                if(data.status == 1){
+                    layer.msg(data.info);
+                    $('#table_list').trigger("reloadGrid");
+                }else{
+                    layer.msg(data.info);
+                }
+                layer.close(index);
+            }
+        })
+    });
+}
+</script>
+</html>

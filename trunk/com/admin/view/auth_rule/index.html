@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <include file="public:header" />
+    <style>
+    	.dd-handle-btn{ position:absolute; right:0; top:0;}
+    	#nestable ol li.dd-item .dd-handle{ background:#e6e6e6; font-weight:bold; height:35px; border-top:1px solid #dddddd; border-left:1px solid #dddddd; border-right:1px solid #dddddd; border-bottom:0; margin:0; border-radius:0; cursor:auto;}
+    	#nestable ol li.dd-item .panel-body{ padding:10px;}
+    	#nestable ol li.dd-item .panel-body span{ display:inline; padding:0 10px; line-height:24px;}
+    	.dd-handle-btn button{ margin:4px 4px 0 0;}
+    	.main-panel{ border-radius:0; margin-top:-6px;}
+    	.sub-panel{ margin-bottom:0;}
+    	.sub-panel .panel-heading{  background:#fafafa; position:relative; border-bottom:0;}
+    	.sub-panel .panel-heading a{ margin-left:5px;}
+    	.sub-panel .panel-heading .sub-panel-menu-box{ position:absolute; top:10px; right:8px;}
+    	.panel-body{ padding:1px 0;}
+    	.right{ float:right;}
+    	.dd-list li{ padding-bottom:1px;}
+    	.sub-panel .panel-body{ overflow:hidden;}
+    	.sub-panel .panel-body .row div{ border-left:1px solid #ddd; margin:5px 0;}
+    	.sub-panel .panel-body .row div font{ color:#444;}
+    	.sub-panel .panel-body .row div a{ color:#999;}
+    </style>
+</head>
+<body class="gray-bg">
+    <div class="wrapper wrapper-content animated fadeInRight">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="ibox ">
+                    <div class="ibox-content">
+                    	<p>
+                    		<button class="btn btn-primary left btn-sm" type="button" id="AddBtn">添加主菜单</button>
+                    		<button type="button" id="editSeq" class="btn btn-white btn-sm btn-outline"><i class="fa fa-sort-numeric-asc"></i>&nbsp;修改排序</button>
+                    	</p>
+	                    <div class="dd" id="nestable">
+	                        <ol class="dd-list">
+	                        	<foreach name="vo" item="vo1">
+	                        		<li class="dd-item" ref="<{$vo1.id}>" data-id="<{$key+1}>">
+		                            	<div class="dd-handle"><i class="<{$vo1.menuclass}>"></i> <{$vo1.title}></div>
+		                            	<div class="panel panel-default main-panel">
+			                                <div class="dd-handle-btn">
+			                                	<button class="btn btn-outline btn-default btn-xs add-sub-menu-btn" type="button" ref="<{$vo1.id}>">添加菜单</button>
+			                                	<button class="btn btn-outline btn-default btn-xs edit-menu-btn" type="button" ref="<{$vo1.id}>">修改</button>
+			                                	<button class="btn btn-outline btn-default btn-xs del-menu-btn" type="button" ref="<{$vo1.id}>">删除</button>
+			                                </div>
+			                                <foreach name="vo1.sub_menu" item="vo2">
+			                                	<div class="panel-body sub-panel-body">
+				                                	<div class="panel panel-default sub-panel">
+					                                    <div class="panel-heading">
+					                                    	<font class="left"><{$vo2.title}></font>
+					                                    	<div class="sub-panel-menu-box right">
+						                                    	<a href="javascript:void(0)" ref="<{$vo2.id}>" class="edit-sub-menu-btn">修改</a>
+						                                    	<a href="javascript:void(0)" ref="<{$vo2.id}>" class="del-sub-menu-btn">删除</a>
+					                                    	</div>
+					                                    </div>
+					                                </div>
+				                                </div>
+			                                </foreach>
+		                                </div>
+		                            </li>
+								</foreach>
+	                        </ol>
+	                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<!-- 全局js -->
+<include file="public:foot" />
+<script>
+$(document).ready(function () {
+    //增
+	$("#AddBtn").click(function() {
+		layerDialog("添加主菜单",'__URL__/add',"90%","80%",true);
+	})
+	$(".add-sub-menu-btn").click(function() {
+		layerDialog("添加子菜单",'__URL__/addSubMenu?parent_id='+$(this).attr("ref"),"90%","250px",true);
+	})
+	
+	//改
+	$(".edit-menu-btn").click(function() {
+		layerDialog("修改主菜单",'__URL__/edit?id='+$(this).attr("ref"),"90%","80%",true);
+	})
+	$(".edit-sub-menu-btn").click(function() {
+		layerDialog("修改子菜单",'__URL__/editSubMenu?id='+$(this).attr("ref"),"90%","250px",true);
+	})
+	
+	//修改排序
+    $("#editSeq").click(function() {
+    	layerDialog("修改排序",'__URL__/editSeq',"90%","90%",true);
+    })
+	
+	//删
+	$(".del-menu-btn").click(function() {
+		delMethod($(this).attr("ref"));
+	})
+	$(".del-sub-menu-btn").click(function() {
+		delMethod($(this).attr("ref"));
+	})
+	function delMethod(id) {
+		layer.confirm('确定执行？', function(index){
+			$.ajax({
+				url:"__URL__/updateStatus",
+				type:"post",
+				data:{'id':id,'field':'status','value':2},
+				success:function(data){
+					if(data.status == 1){
+						layer.msg(data.info);
+						window.location.reload();
+					}else{
+						layer.msg(data.info);
+					}
+				}
+			})
+		    layer.close(index);
+		});
+    }
+});   
+</script>    
+</html>

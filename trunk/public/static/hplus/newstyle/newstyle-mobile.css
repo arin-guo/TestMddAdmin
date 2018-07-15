@@ -1,0 +1,27 @@
+body{
+    color:black;
+    line-height: 2rem;
+    font: normal 100% Helvetica,Arial,sans-serif;
+}
+#page_content{
+    width: 100vw;
+    padding-bottom: 3rem;
+    background-color: #6D6364;
+}
+#page_content img{
+    width: 100%;
+}
+.content_block{
+    background-color: white;
+    width: 90vw;
+    margin-left:auto;
+    margin-right: auto;
+    border-radius: 2rem;
+    padding:2rem 3rem;
+}
+.news_title{
+    text-align: center;
+}
+.news_time{
+    text-align: center;
+}

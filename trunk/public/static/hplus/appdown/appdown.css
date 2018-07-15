@@ -1,0 +1,28 @@
+body{
+    line-height: 2rem;
+}
+#page_content{
+    width: 62rem;
+    margin-left:auto;
+    margin-right: auto;
+    padding-bottom: 3rem;
+    position: relative;
+}
+#page_content .apptitle{
+    text-align: center;
+    font-size: 2rem;
+}
+#page_content .download{
+    width:30%;
+    margin-left:auto;
+    margin-right: auto;
+}
+#page_content img{
+    width: 60%;
+}
+#page_content .downcontent{
+    width: 90%;
+    margin-left:auto;
+    margin-right: auto;
+    padding:2rem 3rem;
+}

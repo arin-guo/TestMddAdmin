@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<include file="public:header" />
+<link href="__HPLUS__/css/dialog.css" rel="stylesheet">
+<link href="__HPLUS__/css/plugins/validform/validform.css" rel="stylesheet">
+<style>
+	.form-control{ padding-left:5px;}
+</style>
+  <body>
+	  <div class="wrapper wrapper-content animated fadeInRight">
+		<form role="form" class="form" action="__URL__/update">
+			<input type="hidden" name="id" value="<{$vo.id}>">
+			<div class="form-group">
+				<label class="col-sm-2 control-label">姓名：</label>
+				<div class="col-sm-10">
+					<input type="text" datatype="s2-5" name="user_name" errormsg="至少2个字符,最多5个字符！" class="form-control" placeholder="用户名"  value="<{$vo.user_name}>">
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">手机号：</label>
+				<div class="col-sm-10">
+					<input type="text" datatype="m" name="tel" class="form-control" placeholder="手机号"  ajaxurl="__URL__/checkValue?t=<{$type}>&type=1&id=<{$vo.id}>" value="<{$vo.tel}>">
+				</div>
+			</div>
+			<eq name="type" value="1">
+			<div class="form-group">
+				<label class="col-sm-2 control-label">办公地点：</label>
+				<div class="col-sm-10">
+					<input type="text" datatype="*" name="address" class="form-control" placeholder="办公地点" value="<{$vo.address}>">
+				</div>
+			</div>
+			</eq>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">性别：</label>
+				<div class="col-sm-10">
+                    <div class="i_check radio-inline">
+                        <input type="radio" id="inlineRadio2" value="1" name="sex" datatype="*" <eq name="vo.sex" value="男">checked</eq>>
+                        <label for="inlineRadio2"> 男 </label>
+                    </div>
+                    <div class="i_check radio-inline">
+                        <input type="radio" id="inlineRadio3" value="2" name="sex" datatype="*" <eq name="vo.sex" value="女">checked</eq>>
+                        <label for="inlineRadio3"> 女 </label>
+                    </div>
+				</div>
+			</div>
+			<div class="clearfix"></div>
+			<br/>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">选择部门：</label>
+				<div class="col-sm-10">
+					<foreach name="department" item="department">
+						<label class="radio-inline" title="<{$department.subtype_name}>">
+						  <input type="radio" class="group" name="cats_code" value="<{$department.subtype_code}>" <eq name="vo.cats_code" value="$department.subtype_code">checked</eq>>  <{$department.subtype_name}>
+						</label>
+					</foreach>
+				</div>
+			</div>
+			<div class="clearfix"></div>
+			<br/>
+			<div class="clearfix">
+				<button type="submit" id="submit" class="btn btn-success btn-block">提交</button>
+				<button type="reset" id="reset2" class="hidden btn btn-success btn-block">重置</button>
+			</div>
+		</form>
+	  </div>
+  </body>
+<!-- 全局js -->
+<include file="public:foot" />
+<script src="__HPLUS__/js/plugins/validform/Validform_v5.3.2_min.js"></script>
+<script src="__HPLUS__/js/jquery.md5.js"></script>
+<script>
+$(function(){
+	
+	$("#reset2").click();
+	var index = parent.layer.getFrameIndex(window.name);
+	var form = $(".form").Validform({
+		tiptype:4,
+		ajaxPost:true,
+		beforeSubmit:function(curform){
+			var groups = "";
+			$(".group:checked").each(function(index){
+				if(index ==0) {
+					groups += $(this).val();
+				}else{
+					groups += "," + $(this).val();
+				}
+			})
+			$("#groups").val(groups);
+		},
+		callback:function(data){
+			if(data.status == 1) {
+				window.parent.layer.msg(data.info);
+				window.parent.$('#table_list').trigger("reloadGrid");
+				parent.layer.close(index);
+			}else{
+				window.parent.layer.msg(data.info);
+			}
+		}
+	});
+})
+</script>
+</html>

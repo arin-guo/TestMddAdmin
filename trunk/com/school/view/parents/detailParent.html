@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<include file="public:header" />
+	<!-- jqgrid-->
+	<link href="__HPLUS__/css/plugins/jqgrid/ui.jqgrid.css?0820" rel="stylesheet">
+</head>
+
+<body class="gray-bg">
+<div class="wrapper wrapper-content  animated fadeInRight">
+	<input id="id" class="hide" value="<{$id}>"/>
+	<div class="row">
+		<div class="col-sm-12">
+			<div class="ibox ">
+				<div class="ibox-content">
+					<p>
+						<button type="button" id="add" class="btn btn-white btn-sm btn-outline"><i class="fa fa-plus-square-o"></i>&nbsp;新增从属家长</button>
+						<button type="button" id="edit" class="btn btn-white btn-sm btn-outline"><i class="fa fa-table"></i>&nbsp;修改信息</button>
+						<button type="button" id="subdel" class="btn btn-white btn-sm btn-outline"><i class="fa fa-trash-o"></i>&nbsp;删除</button>
+					</p>
+					<div class="jqGrid_wrapper">
+						<table id="table_list"></table>
+						<div id="pager_list"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+</body>
+<!-- 全局js -->
+<include file="public:foot" />
+<!-- jqGrid -->
+<script src="__HPLUS__/js/plugins/jqgrid/i18n/grid.locale-cn.js?0820"></script>
+<script src="__HPLUS__/js/plugins/jqgrid/jquery.jqGrid.min.js?0820"></script>
+<!-- Page-Level Scripts -->
+<script>
+    $(document).ready(function () {
+        //初始化
+        $.jgrid.defaults.styleUI = 'Bootstrap';
+        $("#table_list").jqGrid({
+            url : '__URL__/getParentData?id=' + $("#id").val(),
+            datatype: "json",
+            height: 450,
+            autowidth: true,
+            shrinkToFit: true,
+            rowNum: 15,
+            rowList: [10, 15, 30, 50],
+            colNames: ['姓名','手机号','照片','主家长','状态','操作'],
+            colModel: [ {name : 'realname',index : 'realname'},
+                {name : 'tel',index : 'tel'},
+                {name : 'photo',index : 'photo',formatter : function(cellvalue, options, rowObject){
+                        var content = "";
+                        if(cellvalue != null && cellvalue.length != 0 && cellvalue != "" ){
+                            content = '<img alt="点击放大" src="__IMGROOT__'+cellvalue+'" style="width:50px;">';
+                        }else{
+                            content="暂无";
+                        }
+                        return content;
+                    },sortable:false},
+				{name:'c_name',index:'c_name'},
+                {name : 'status',index : 'status',formatter : function(cellvalue, options, rowObject){
+                        var content ="";
+                        if(cellvalue == 1) {
+                            content = '<font color="green">正常</font>';
+                        }else if(cellvalue == -1) {
+                            content = '<font color="red">毕业</font>';
+                        }else if(cellvalue == -2){
+                            content = '<font color="blue">离校</font>';
+                        }
+                        return content;
+                    },sortable:false},
+                {name : 'status',index : 'status',formatter : function(cellvalue, options, rowObject){
+                        var content ="";
+                        content = '<button class="btn btn-primary btn-xs btn-outline" onclick="detail('+rowObject.id+')"><i class="fa fa-building"></i>  详情</button>';
+                        return content;
+                    },sortable:false}
+            ],
+            pager: "#pager_list",
+            viewrecords: true,
+            hidegrid: false,
+            sortname: "id",
+            sortorder: "desc",
+        });
+        // 设置按钮
+        $("#table_list").jqGrid('navGrid', '#pager_list', {
+            edit: false,
+            add: false,
+            del: false,
+            search: false
+        }, {
+            height: 200,
+            reloadAfterSubmit: true
+        });
+        // 添加适配响应
+        $(window).bind('resize', function () {
+            var width = $('.jqGrid_wrapper').width();
+            $('#table_list').setGridWidth(width);
+        });
+        //增主家长
+        $("#add").click(function() {
+            layerDialog("添加",'__URL__/addsubparent?id='+$("#id").val()+'&type='+$("#type").val(),"90%","80%",true);
+        })
+        //改
+        $("#edit").click(function() {
+            var id = $("#table_list").jqGrid('getGridParam','selrow');
+            if(id != null) {
+                layerDialog("修改",'__URL__/edit?id='+id+'&type='+$("#type").val(),"90%","80%",true);
+            }else {
+                layer.msg("您没有选取数据！");
+            }
+        });
+        //重置密码
+        $("#reset").click(function() {
+            var id = $("#table_list").jqGrid('getGridParam','selrow');
+            if(id != null) {
+                resetPwd(id);
+            }else {
+                layer.msg("您没有选取数据！");
+            }
+        });
+        //删除
+        $("#subdel").click(function() {
+            var id = $("#table_list").jqGrid('getGridParam','selrow');
+            if(id != null) {
+                layer.confirm('确定删除？', function(index){
+                    $.ajax({
+                        url:"__URL__/subParentDel",
+                        type:"post",
+                        data:{'id':id},
+                        success:function(data){
+                            if(data.status == 1){
+                                layer.msg(data.info);
+                                $('#table_list').trigger("reloadGrid");
+                            }else{
+                                layer.msg(data.info);
+                            }
+                        }
+                    })
+                    layer.close(index);
+                });
+            }else {
+                layer.msg("您没有选取数据！");
+            }
+        })
+    });
+
+    function detail(id){
+        layerDialog("详细","__URL__/detailView?id="+id,"90%","90%",true)
+    }
+
+    // function resetPwd(id) {
+    //     layer.confirm('密码将重置为 <font style="color:red;">000000</font></br>确定执行？', function(index){
+    //         var index = layer.load(2);
+    //         $.ajax({
+    //             url:"__URL__/updateStatus",
+    //             type:"post",
+    //             data:{'id':id,'field':'password','value':"670b14728ad9902aecba32e22fa4f6bd"},
+    //             success:function(data){
+    //                 if(data.status == 1){
+    //                     layer.msg(data.info);
+    //                     $('#table_list').trigger("reloadGrid");
+    //                 }else{
+    //                     layer.msg(data.info);
+    //                 }
+    //                 layer.close(index);
+    //             }
+    //         })
+    //     });
+    // }
+</script>
+</html>

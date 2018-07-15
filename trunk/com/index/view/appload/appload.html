@@ -1,0 +1,65 @@
+<html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="renderer" content="webkit">
+<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE10"/>
+<title>App下载安装</title>
+<!--[if lt IE 8]>
+<script>
+    alert('系统已不支持IE6-8，请使用谷歌、火狐等浏览器\n或360、QQ等国产浏览器的极速模式浏览本页面！');
+</script>
+<![endif]-->
+<link type="image/x-icon" rel="shortcut icon" href="/favicon.ico">
+<link href="__HPLUS__/css/bootstrap.min.css?v=3.4.0" rel="stylesheet">
+<link href="__HPLUS__/css/font-awesome.min.css?v=4.3.0" rel="stylesheet">
+<link href="__HPLUS__/css/animate.css" rel="stylesheet">
+<link href="__HPLUS__/css/style.css?v=3.1.0" rel="stylesheet">
+<link href="__HPLUS__/css/plugins/iCheck/custom.css" rel="stylesheet">
+<style>
+    @import url("/static/hplus/appdown/appdown-mobile.css") screen and (max-device-width: 600px);
+    @import url("/static/hplus/appdown/appdown.css") screen and (min-width: 601px);
+</style>
+<body>
+    <div id="page_content">
+        <div class="apptitle">萌点点-家长端</div>
+        <div class="download">
+            <a href="http://upload.mengdd.net/uploads/static/app/MddParent_v1.0.10.apk">
+                <img src="__HPLUS__/appdown/parent.png" alt="萌点点家长端" style="box-shadow: 5px 5px 10px #aaa;">
+            </a>
+        </div>
+        <div class="clearfix"></div>
+        <br>
+        <div class="apptitle">萌点点-园长端</div>
+        <div class="download">
+            <a href="http://upload.mengdd.net/uploads/static/app/MddLeader_v1.0.10.apk">
+                <img src="__HPLUS__/appdown/leader.png" alt="萌点点园长端" style="box-shadow: 5px 5px 10px #aaa;">
+            </a>
+        </div>
+        <div class="clearfix"></div>
+        <br>
+        <div class="apptitle">萌点点-教师端</div>
+        <div class="download">
+            <a href="http://upload.mengdd.net/uploads/static/app/MddTeacher_v1.0.10.apk">
+                <img src="__HPLUS__/appdown/teacher.png" alt="萌点点教师端" style="box-shadow: 5px 5px 10px #aaa;">
+            </a>
+        </div>
+        <div class="clearfix"></div>
+        <br>
+        <div class="downcontent">
+            点击图标，下载安装包。<font color="red">微信请点击右上角“···”，选择“在浏览器中打开”</font>
+        </div>
+    </div>
+</body>
+<!-- 全局js -->
+<script src="__HPLUS__/js/jquery-2.1.1.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function () {
+    //音频src追加表头
+    $(".news_audio audio").each(function(){
+        var src = "__IMGROOT__"+$(this).attr("src");
+        console.log(src);
+        $(this).attr("src",src);
+    })
+})
+</script>
+</html>

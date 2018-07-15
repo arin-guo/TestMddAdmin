@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html>
+<include file="public:header" />
+<link href="__HPLUS__/css/dialog.css" rel="stylesheet">
+<link href="__HPLUS__/css/plugins/validform/validform.css" rel="stylesheet">
+<link href="__HPLUS__/js/plugins/uploadImg/upload.css" rel="stylesheet">
+<link href="__HPLUS__/js/plugins/fancybox/jquery.fancybox.css" rel="stylesheet">
+<!-- Data picker -->
+<link href="__HPLUS__/css/plugins/datapicker/datepicker3.css" rel="stylesheet">
+<style>
+    .form-control{ padding-left: 5px; }
+    .city-selector { margin-bottom: 10px; }
+    .city-selector .is-hide { display: none; }
+    .city-selector .el-cascader { width: 320px; }
+    .city-selector .address-detail { margin: 15px 0; }
+</style>
+<body>
+<div class="wrapper wrapper-content" id="app">
+	<form role="form" class="form" action="__URL__/update">
+		<input type="hidden" value="<{$vo.id}>" name="id"/>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">活动名称：</label>
+			<div class="col-sm-10">
+				<input type="text" datatype="*" value="<{$vo.title}>" name="title" class="form-control" placeholder="输入活动名称">
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">简介：</label>
+			<div class="col-sm-10">
+				<input type="text" name="intro" datatype="*" value="<{$vo.intro}>" class="form-control" placeholder="输入活动简介">
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">电话：</label>
+			<div class="col-sm-10">
+				<input type="text" name="address" datatype="*" value="<{$vo.phone_number}>" class="form-control" placeholder="输入电话">
+			</div>
+		</div>
+    <div class="form-group">
+      <label class="col-sm-2 control-label">选择城市：</label>
+      <div class="col-sm-10">
+        <div class="city-selector">
+          <input name="place_code" type="text" class="is-hide" v-model="selectCity">
+          <el-cascader :options="options" :props="props" v-model="selectCity"></el-cascader>
+          <input type="text" name="address" value="<{$vo.address}>" 
+            class="form-control col-sm-4 address-detail" placeholder="输入地址">
+        </div>
+      </div>
+    </div>
+    <div class="clearfix"></div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">开放日：</label>
+			<div class="col-sm-10">
+				<input type="text" name="clear_cue" datatype="*" value="<{$vo.clear_cue}>" class="form-control" placeholder="输入开放日">
+			</div>
+		</div>
+		<div class="clearfix"></div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">列表头图：</label>
+			<div class="col-sm-10">
+				<div class="file-up"  data-num="1">
+					<input id="photo" name="photo" value="<{$vo.photo}>" datatype="*" type="hidden" />
+					<section class="file-box">
+						<img src="__HPLUS__/js/plugins/uploadImg/img/choose.png" class="add-img">
+						<button type="button" onclick="doUpload(this)" class="file"></button>
+					</section>
+				</div>
+			</div>
+		</div>
+		<div class="clearfix"></div>
+		<br>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">每人价格(元)：</label>
+			<div class="col-sm-10">
+				<input type="text" datatype="n" value="<{$vo.price}>" name="price" class="form-control" placeholder="亲子游每人需要的价格">
+			</div>
+		</div>
+		<div class="clearfix"></div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">报名截止时间：</label>
+			<div class="col-sm-10 input-daterange">
+				<div class="col-sm-6">
+					<input type="text" name="enroll_close_time" value="<{$vo.enroll_close_time}>" class="form-control" placeholder="选择报名截止日期">
+				</div>
+			</div>
+		</div>
+		<div class="clearfix"></div>
+		<br>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">活动开始时间：</label>
+			<div class="col-sm-10">
+				<input type="hidden" name="begin_time" id="begin_time" value="<{$vo.begin_time}>" />
+                <input type="hidden" name="end_time" id="end_time" value="<{$vo.end_time}>" />
+                <input type="text" datatype="*" id="laydate1" class="form-control" placeholder="开始/结束时间">
+				<!-- <div class="col-sm-6">
+					<input type="text" name="begin_time" value="<{$vo.begin_time}>" class="form-control" placeholder="选择活动开始日期">
+				</div> -->
+			</div>
+		</div>
+		<div class="clearfix"></div>
+		<br>
+		<!-- <div class="form-group"> input-daterange
+			<label class="col-sm-2 control-label">活动结束时间：</label>
+			<div class="col-sm-10 input-daterange">
+				<div class="col-sm-6">
+					<input type="text" name="end_time" value="<{$vo.end_time}>" class="form-control" placeholder="选择活动结束日期">
+				</div>
+			</div>
+		</div>
+		<div class="clearfix"></div><br/> -->
+		<div class="form-group">
+            <label class="col-sm-2 control-label">行程推荐：</label>
+            <div class="col-sm-10">
+                <textarea type="text" name="run_line" datatype="*" value="" class="form-control" placeholder="输入行程推荐"><{$vo.run_line}></textarea>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">行程提示：</label>
+            <div class="col-sm-10">
+                <textarea type="text" name="run_line" datatype="*" value="" class="form-control" placeholder="输入行程推荐"><{$vo.run_line}></textarea>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">取消说明：</label>
+            <div class="col-sm-10">
+                <textarea type="text" name="cance_say" datatype="*" value="" class="form-control" placeholder="输入行程推荐"><{$vo.cance_say}></textarea>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">注意事项：</label>
+            <div class="col-sm-10">
+                <textarea type="text" name="need_thing" datatype="*" value="" class="form-control" placeholder="输入行程推荐"><{$vo.need_thing}></textarea>
+            </div>
+        </div>
+        <div class="form-group">
+			<label class="col-sm-2 control-label">费用包含：</label>
+			<div class="col-sm-10">
+				<textarea type="text" name="money_all" datatype="*" value="" class="form-control" placeholder="输入行程推荐"><{$vo.money_all}></textarea>
+			</div>
+		</div>
+		<div class="clearfix"></div><br/>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">费用不包含：</label>
+			<div class="col-sm-10">
+				<textarea type="text" name="not_money" datatype="*" value="" class="form-control" placeholder="输入费用详情"><{$vo.not_money}></textarea>
+			</div>
+		</div>
+		<div class="clearfix"></div><br/>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">内容：</label>
+			<div class="col-sm-10">
+				<script id="myEditor" type="text/plain" style="min-height:280px;">
+					<{$vo.content}>
+				</script>
+                <input class="form-control" type="hidden" id="content_input" name="content">
+			</div>
+		</div>
+		<div class="clearfix"></div><br>
+		<div class="clearfix">
+			<button type="submit" id="submit" class="btn btn-success btn-block">提交</button>
+			<button type="reset" id="reset2" class="btn btn-success btn-block hidden">重置</button>
+        </div>
+     </form>
+   </div>
+</body>
+<!-- 全局js -->
+<include file="public:foot" />
+<script src="__HPLUS__/js/plugins/validform/Validform_v5.3.2_min.js"></script>
+<script type="text/javascript" src="__HPLUS__/js/plugins/uploadImg/jquery.upload.js"></script>
+<script src="__HPLUS__/js/plugins/fancybox/jquery.fancybox.js"></script>
+<script src="__HPLUS__/js/plugins/layer/laydate/laydate.js"></script>
+<!-- Data picker -->
+<script src="__HPLUS__/js/plugins/datapicker/bootstrap-datepicker.js"></script>
+<!--Baidu umeditor-->
+<script type="text/javascript" src="__HPLUS__/js/plugins/ueditor/ueditor.config.js"></script>
+<script type="text/javascript" src="__HPLUS__/js/plugins/ueditor/ueditor.all.js"></script>
+<script>
+var areaData = <{$placeinfo}>;
+var placeCode = "<{$vo.place_code}>";
+$(document).ready(function () {
+    //大图展示
+    $(".fancybox").fancybox({openEffect:"none",closeEffect:"none"});
+    //图片回显
+    var imgSrc = $(".file-up").find("input[type='hidden']").val();
+    if(imgSrc != ""){
+        imgSrc = imgSrc.split("|");
+        for(var i = 0;i < imgSrc.length;i++){
+            $.appendImg($(".file-up").find("button"),imgSrc[i]);
+        }
+        //图片独立服务器追加表头
+        $(".file-box a.fancybox").each(function(){
+            var href = "__IMGROOT__"+$(this).attr("href");
+            console.log(href);
+            $(this).attr("href",href);
+        })
+        $(".file-box img.up-img").each(function(){
+            var src = "__IMGROOT__"+$(this).attr("src");
+            console.log(src);
+            $(this).attr("src",src);
+        })
+    }
+})
+
+$(function(){
+  new Vue({
+    el: "#app",
+    data: function() {
+      return { 
+        visible: false,
+        options: [],
+        selectCity: [],
+        props: {
+          value: "id",
+          label: "name"
+        }
+      }
+    },
+    created: function() {
+      this.options = areaData;
+      var _tempArr = placeCode.split(',');
+      for (var i = 0; i <= _tempArr.length; i++) {
+        if (Number(_tempArr[i])) {
+          this.selectCity.push(Number(_tempArr[i]))
+        }
+      }
+    }
+  });
+  
+	//执行一个laydate实例
+    laydate.render({
+        elem: '#laydate1',
+        type: 'time',
+        theme: '#1c84c6',
+        format: 'HH:mm:ss',
+        min: '06:00:00',
+        max: '20:00:00',
+        value: '<{:empty($vo.begin_time)?"08:00:00":$vo.begin_time}> - <{:empty($vo.end_time)?"18:00:00":$vo.end_time}>',
+        range: true
+    });
+	//Data picker
+	$('.input-daterange').datepicker({
+		keyboardNavigation: false,
+		forceParse: false,
+		autoclose: true,
+		todayHighlight: true,
+		todayBtn:true
+	});
+    var um = UE.getEditor('myEditor',{
+        initialFrameHeight:300,//设置编辑器高度
+        scaleEnabled:true//设置不自动调整高度
+        //scaleEnabled {Boolean} [默认值：false]//是否可以拉伸长高，(设置true开启时，自动长高失效)
+    });
+    UE.Editor.prototype._bkGetActionUrl = UE.Editor.prototype.getActionUrl;
+    UE.Editor.prototype.getActionUrl = function(action) {
+        if (action == 'uploadimage' || action == 'uploadscrawl' || action == 'uploadimage') {
+            return '__URL__/uploadImg';
+        } else if (action == 'uploadvideo') {
+            return '#';
+        } else {
+            return this._bkGetActionUrl.call(this, action);
+        }
+    }
+    $("#reset2").click();
+    var index = parent.layer.getFrameIndex(window.name);
+    var form = $(".form").Validform({
+        tiptype:4,
+        ajaxPost:true,
+        beforeSubmit:function(){
+            var html = um.getContent();
+            $("#content_input").attr('value',html);
+            var time = $("#laydate1").val();
+            var timeArr = time.split('-');
+            $("#begin_time").val(timeArr[0]);
+            $("#end_time").val(timeArr[1]);
+        },
+        callback:function(data){
+            if(data.status == 1) {
+                window.parent.layer.msg(data.info);
+                window.parent.$('#table_list').trigger("reloadGrid");
+                parent.layer.close(index);
+            }else{
+                window.parent.layer.msg(data.info);
+            }
+        }
+    });
+})
+
+function doUpload(t) {
+    $.upload({
+        url: '__URL__/uploadImgHead',
+        fileName: 'image',
+        dataType: 'json',
+        acceptType:'image/jpeg,image/png',
+        onSend: function() {
+            return true;
+        },
+        // 上传之后回调
+        onComplate: function(data) {
+            if(data.status == 1){
+                var url =data.data;
+                $.appendImg(t,url);
+                //图片独立服务器追加表头
+                $(".file-box a.fancybox").each(function(){
+                    var href = "__IMGROOT__"+$(this).attr("href");
+                    $(this).attr("href",href);
+                });
+                $(".file-box img.up-img").each(function(){
+                    var src = "__IMGROOT__"+$(this).attr("src");
+                    $(this).attr("src",src);
+                })
+            }else{
+                layer.alert(data.info);
+            }
+        }
+    });
+}
+</script>
+</html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <include file="public:header" />
+    <!-- jqgrid-->
+    <link href="__HPLUS__/css/plugins/jqgrid/ui.jqgrid.css?0820" rel="stylesheet">
+</head>
+
+<body class="gray-bg">
+    <div class="wrapper wrapper-content animated fadeInRight">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="ibox ">
+                    <div class="ibox-content">
+                    	<p>
+                    		<button type="button" id="add" class="btn btn-white btn-sm btn-outline"><i class="fa fa-plus-square-o"></i>&nbsp;新增</button>
+                    		<button type="button" id="edit" class="btn btn-white btn-sm btn-outline"><i class="fa fa-edit"></i>&nbsp;修改</button>
+                    		<button type="button" id="del" class="btn btn-white btn-sm btn-outline"><i class="fa fa-trash-o"></i>&nbsp;删除</button>
+                    		<button type="button" id="config" class="btn btn-white btn-sm btn-outline"><i class="fa fa-gears"></i>&nbsp;配置权限</button>
+                    	</p>
+                        <div class="jqGrid_wrapper">
+                            <table id="table_list"></table>
+                            <div id="pager_list"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<!-- 全局js -->
+<include file="public:foot" />
+<!-- jqGrid -->
+<script src="__HPLUS__/js/plugins/jqgrid/i18n/grid.locale-cn.js?0820"></script>
+<script src="__HPLUS__/js/plugins/jqgrid/jquery.jqGrid.min.js?0820"></script>
+<!-- Page-Level Scripts -->
+<script>
+$(document).ready(function () {
+	//初始化
+    $.jgrid.defaults.styleUI = 'Bootstrap';
+    $("#table_list").jqGrid({
+    	url : '__URL__/getAllData',
+        datatype: "json",
+        height: 580,
+        autowidth: true,
+        shrinkToFit: true,
+        rowNum: 15,
+        rowList: [10, 15, 30, 50],
+        colNames : [ 'ID', '组名', '描述信息', '所属模块', '状态' ],
+        colModel : [ {name : 'id',index : 'id'},
+                     {name : 'title',index : 'title'},
+                     {name : 'description',index : 'description'},
+                     {name : 'module',index : 'module'},
+                     {name : 'status',index : 'status',formatter : function(cellvalue, options, rowObject){
+                        	 if(cellvalue == -1){
+                        	 	content = "删除";
+                        	 } else if(cellvalue == 0){
+                        		content = "禁用";
+                        	 } else if(cellvalue == 1){
+                        		content = "正常";
+                        	 }
+                        	 return content;
+                   		}}
+                   ],
+        pager: "#pager_list",
+        viewrecords: true,
+        hidegrid: false,
+        sortname: "id",
+        sortorder: "desc",
+    });
+    // 设置按钮
+    $("#table_list").jqGrid('navGrid', '#pager_list', {
+        edit: false,
+        add: false,
+        del: false,
+        search: false
+    }, {
+        height: 200,
+        reloadAfterSubmit: true
+    });
+    // 添加适配响应
+    $(window).bind('resize', function () {
+        var width = $('.jqGrid_wrapper').width();
+        $('#table_list').setGridWidth(width);
+    });
+	//设置权限            
+    $("#config").click(function() {
+    	var id = $("#table_list").jqGrid('getGridParam','selrow');
+    	if(id != null) {
+    		layerDialog("设置权限",'__URL__/conf?id='+id,"90%","80%",true);
+    	}else {
+    		layer.msg("您没有选取数据！");
+    	}
+    })
+    //增
+	$("#add").click(function() {
+		layerDialog("新增",'__URL__/add',"90%","300px",true);
+	})
+	//改
+    $("#edit").click(function() {
+    	var id = $("#table_list").jqGrid('getGridParam','selrow');
+    	if(id != null) {
+    		layerDialog("修改",'__URL__/edit?id='+id,"90%","300px",true);
+    	}else {
+    		layer.msg("您没有选取数据！");
+    	}
+    })
+    //删
+    $("#del").click(function() {
+    	var id = $("#table_list").jqGrid('getGridParam','selrow');
+    	if(id != null) {
+    		layer.confirm('删除后将导致拥有该分组权限的用户失去权限！确定执行？', function(index){
+				$.ajax({
+					url:"__URL__/updateStatus",
+					type:"post",
+					data:{'id':id,'field':'status','value':'-1'},
+					success:function(data){
+						if(data.status == 1){
+							layer.msg(data.info);
+							$('#table_list').trigger("reloadGrid");
+						}else{
+							layer.msg(data.info);
+						}
+					}
+				})
+			});
+    	}else {
+    		layer.msg("您没有选取数据！");
+    	}
+    })
+});
+</script>
+</html>

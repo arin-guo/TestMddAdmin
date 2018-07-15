@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<include file="public:header" />
+<link href="__HPLUS__/css/dialog.css" rel="stylesheet">
+<link href="__HPLUS__/css/plugins/validform/validform.css" rel="stylesheet">
+<!-- Data picker -->
+<link href="__HPLUS__/css/plugins/datapicker/datepicker3.css" rel="stylesheet">
+<style>
+.ui-datepicker-calendar {
+    display: none;
+}
+</style>
+<body class="gray-bg">
+    <div class="wrapper wrapper-content">
+        <div class="row">
+            <div class="col-sm-3">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-content">
+                        <div class="file-manager">
+                        	<div class="hr-line-dashed"></div>
+                        	<div class="ibox-search-box">
+	                            <div class="infont col-md-12">
+                                    <select class="form-control m-b" id="type"  placeholder="日志类型">
+                                        <option value="1">运行日志</option>
+                                        <option value="2">监听日志</option>
+                                    </select>
+	                            </div>
+	                            <div class="infont col-md-12 ">
+		                    		<input type="text" id="datepicker" class="form-control" readonly="readonly" value="<{:date('Ym')}>" placeholder="月份">
+								</div>
+								<button class="btn btn-primary btn-block" id="sumbtn">搜索</button>
+                            </div>
+                            <h5>文件列表</h5>
+                            <input type="hidden" value="" id="basepath">
+                            <input type="hidden" value="" id="realpath">
+                            <ul class="folder-list" style="padding: 0">
+                                
+                            </ul>
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-9 animated fadeInRight">
+                <div class="row">
+                <div class="col-sm-12">
+                    <div class="ibox ">
+                        <div class="ibox-title">
+                            <h5>日志内容</h5>
+                            <div class="ibox-tools">
+                            <a class="dropdown-toggle" data-toggle="dropdown" href="tabs_panels.html#">
+                                <i class="fa fa-wrench"></i>
+                            </a>
+                            <ul class="dropdown-menu dropdown-user">
+	                            <li><a href="javascript:void(0)" onclick="clearFile()">清空日志</a>
+	                            </li>
+                        	</ul>
+                        	</div>
+                        </div>
+                        <div class="ibox-content">
+                        	<pre></pre>
+                        </div>
+            		</div>
+            	</div>
+            </div>
+        </div>
+    </div>
+</body>
+<!-- 全局js -->
+<include file="public:foot" />
+<!-- Data picker -->
+<script src="__HPLUS__/js/plugins/datapicker/bootstrap-datepicker.js"></script>
+<script>
+	$(document).ready(function(){
+		$("pre").css("height",$(window).height()-100);
+		//Data picker
+	    $('#datepicker').datepicker({
+	    	format: "yyyymm",
+	        minViewMode: 1,
+	        autoclose: true,
+	        language: "zh-CN"
+	    });
+		//获取文件列表
+		getFileList();
+		$("#sumbtn").click(function(){
+			getFileList();
+		})
+	});
+	function getFileList(){
+		$.ajax({
+			url:"__URL__/getFileList",
+			type:"post",
+			data:{type:$("#type").val(),month:$("#datepicker").val()},
+			success:function(data){
+				$("#basepath").val(data.data.path);
+				if(data.status == 1){
+					$("ul.folder-list li").remove();
+					var file = data.data.file;
+					if(file.length == 0){
+						layer.msg(data.info);
+					}else{
+						for(var i = 0; i < file.length;i++){
+							$("ul.folder-list").append('<li><a href="javascript:void(0)" onclick="readFile(this)" ref="'+file[i]+'"><i class="fa fa-file"></i>'+file[i]+'</a</li>')
+						}
+					}
+				}else{
+					layer.msg(data.info);
+				}
+			}
+		})
+	}
+	
+	function readFile(t){
+		var path = $("#basepath").val() +"/" + $(t).attr("ref");
+		$.ajax({
+			url:"__URL__/getFileContent",
+			type:"post",
+			data:{path:path},
+			success:function(data){
+				if(data.status == 1){
+					$("#realpath").val(path);
+					$("pre").html(data.data);
+				}else{
+					layer.msg(data.info);
+				}
+			}
+		})
+	}
+	function clearFile(){
+		if($("#realpath").val() == ""){
+			layer.msg("请先选择一个文件");
+			return ;
+		}
+		$.ajax({
+			url:"__URL__/clearFileContent",
+			type:"post",
+			data:{path:$("#realpath").val()},
+			success:function(data){
+				if(data.status == 1){
+					layer.msg(data.info);
+					$("pre").html(data.data);
+				}else{
+					layer.msg(data.info);
+				}
+			}
+		})
+	}
+</script>

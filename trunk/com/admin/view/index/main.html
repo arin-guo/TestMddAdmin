@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <include file="public:header" />
+</head>
+
+<body class="gray-bg">
+	<div class="wrapper wrapper-content">
+		<div class="row">
+			<div class="col-sm-12">
+		        <div class="ibox float-e-margins">
+					<div class="ibox-content">
+						<h5>欢迎你:<span style="color: red;">【<{:session("user_admin_username")}>】<{:session("user_admin_realname")}>。</span></h5>现在是北京时间<{:date('Y-m-d H:i:s')}>
+					</div>
+		    	</div>
+			</div>
+		</div>
+	</div>
+</body>
+<!-- 全局js -->
+<include file="public:foot" />
+<script src="__HPLUS__/js/plugins/echarts/echarts.min.js"></script>
+<script type="text/javascript">
+</script>
+</html>

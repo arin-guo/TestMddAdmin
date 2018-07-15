@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <include file="public:header" />
+</head>
+
+<body class="gray-bg">
+	<div class="wrapper wrapper-content">
+		<div class="row">
+			<div class="col-sm-12">
+		        <div class="ibox float-e-margins">
+					<div class="ibox-content">
+						<h5>欢迎你:<span style="color: red;">【<{:session("user_teacher_tel")}>】<{:session("user_teacher_realname")}>。</span></h5>现在是北京时间<{:date('Y-m-d H:i:s')}>
+						<br/>
+						<h5>班级注册状态：
+							<eq name="$is_open" value="1">
+								开放。
+								<button class="btn btn-success btn-xs btn-outline" onclick="updateStatus(2)"><i class="fa fa-cog"></i>  关闭注册</button>
+							<else/>
+								关闭。
+								<button class="btn btn-danger btn-xs btn-outline" onclick="updateStatus(1)"><i class="fa fa-cog"></i>  开启注册</button>
+							</eq>
+						</h5>
+						<div class="alert alert-success">
+	                      	  为了获得更优体验，推荐使用火狐或Chrome等高级浏览器，
+	                        <a class="alert-link" href="http://www.firefox.com.cn/" target="_blank">点击下载!</a>
+	                    </div>
+					</div>
+		    	</div>
+			</div>
+		</div>
+	</div>
+</body>
+<!-- 全局js -->
+<include file="public:foot" />
+<script src="__HPLUS__/js/plugins/echarts/echarts.min.js"></script>
+<script type="text/javascript">
+function updateStatus(status){
+    layer.confirm('确定执行？', function(index){
+        var index = layer.load(2);
+        $.ajax({
+            url:"<{:url('index/updateClassStatus')}>",
+            type:"post",
+            data:{'is_open':status},
+            success:function(data){
+                if(data.status == 1){
+                    layer.msg(data.info);
+                    window.location.reload();
+                }else{
+                    layer.msg(data.info);
+                }
+            }
+        })
+    });
+}
+</script>
+</html>

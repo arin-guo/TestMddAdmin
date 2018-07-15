@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<include file="public:header" />
+<link href="__HPLUS__/css/dialog.css" rel="stylesheet">
+<link href="__HPLUS__/css/plugins/validform/validform.css" rel="stylesheet">
+<style>
+	.form-control{ padding-left:5px;}
+</style>
+  <body>
+	  <div class="wrapper wrapper-content">
+	  	<form role="form" class="form" action="__URL__/insert">
+			<input type="hidden" value="<{:session('school_info_id')}>" name="school_id"/>
+			<input type="hidden" value="<{$classid}>" name="class_id"/>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">课程名：</label>
+				<div class="col-sm-10">
+					<select name="course_id" class="form-control" datatype="*">
+						<option value="">请选择</option>
+						<foreach item="cou" name="cou">
+							<option value="<{$cou.id}>"><{$cou.name}></option>
+						</foreach>
+					</select>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">课程时间节次信息：</label>
+				<div class="col-sm-10">
+					<select name="course_time_id" class="form-control" datatype="*">
+						<option value="">请选择</option>
+						<foreach item="coutime" name="coutime">
+							<option value="<{$coutime.id}>">
+							<switch name="$coutime.weeks">
+								<case value="1">星期一</case>
+								<case value="2">星期二</case>
+								<case value="3">星期三</case>
+								<case value="4">星期四</case>
+								<case value="5">星期五</case>
+								<case value="6">星期六</case>
+								<case value="7">星期日</case>
+							</switch>
+							<{$coutime.begin_time|substr=0,5}>-<{$coutime.end_time|substr=0,5}>&nbsp;
+							<switch name="$coutime.title">
+				  				<case value="1">第一节</case>
+				  				<case value="2">第二节</case>
+				  				<case value="3">第三节</case>
+				  				<case value="4">第四节</case>
+				  				<case value="5">第五节</case>
+				  				<case value="6">第六节</case>
+				  				<case value="7">第七节</case>
+				  				<case value="8">第八节</case>
+				  				<default />暂无
+				  			</switch>
+							</option>
+						</foreach>
+					</select>
+				</div>
+			</div>
+			<div class="clearfix"></div><br>
+			<div class="clearfix">
+				<button type="submit" id="submit" class="btn btn-success btn-block">提交</button>
+				<button type="reset" id="reset2" class="btn btn-success btn-block hidden">重置</button>
+			</div>
+		</form>
+	  </div>
+  </body>
+<!-- 全局js -->
+<include file="public:foot" />
+<script src="__HPLUS__/js/plugins/validform/Validform_v5.3.2_min.js"></script>
+<script>
+$(function(){
+	$("#reset2").click();
+	var index = parent.layer.getFrameIndex(window.name);
+	var form = $(".form").Validform({
+		tiptype:4,
+		ajaxPost:true,
+		callback:function(data){
+			if(data.status == 1) {
+				window.parent.layer.msg(data.info);
+				window.parent.$('#table_list').trigger("reloadGrid");
+				parent.layer.close(index);
+			}else{
+				window.parent.layer.msg(data.info);
+			}
+		}
+	});
+})
+</script>
+</html>

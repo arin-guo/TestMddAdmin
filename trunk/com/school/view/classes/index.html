@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+<head>
+<include file="public:header" />
+<!-- jqgrid-->
+<link href="__HPLUS__/css/plugins/jqgrid/ui.jqgrid.css?0820" rel="stylesheet">
+<link href="__HPLUS__/js/plugins/fancybox/jquery.fancybox.css" rel="stylesheet">
+</head>
+
+<body class="gray-bg">
+    <div class="wrapper wrapper-content animated fadeInRight">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="ibox ">
+                    <div class="ibox-content">
+                    	<div class="ibox-search-box">
+                    		<div class="row">
+	                    		<div class="infont col-md-2">
+		                    		<select name="cats_code" class="form-control"  placeholder="班级类型">
+										<option value=" ">请选择</option>
+										<foreach item="vo" name="vo">
+										<option value="<{$vo.subtype_code}>"><{$vo.subtype_name}></option>
+										</foreach>
+									</select>
+								</div>
+								<input type="hidden" id="sid" value="<{:session('school_info_id')}>">
+								<div class="infont col-md-2">
+	                    			<button class="btn btn-success btn-block btn-ibox-search" type="button">搜索</button>
+	                    		</div>
+                    		</div>
+                    	</div>
+                    	<p>
+                    		<button type="button" id="add" class="btn btn-white btn-sm btn-outline"><i class="fa fa-plus-square-o"></i>&nbsp;新增班级</button>
+                    		<button type="button" id="edit" class="btn btn-white btn-sm btn-outline"><i class="fa fa-table"></i>&nbsp;修改年级</button>
+                    		<button type="button" id="teacher" class="btn btn-white btn-sm btn-outline"><i class="fa fa-table"></i>&nbsp;绑定老师</button>
+                    		<button type="button" id="student" class="btn btn-white btn-sm btn-outline"><i class="fa fa-table"></i>&nbsp;学生列表</button>
+                    		<button type="button" id="camera" class="btn btn-white btn-sm btn-outline"><i class="fa fa-video-camera"></i>&nbsp;直播设备</button>
+                    		<button type="button" id="del" class="btn btn-white btn-sm btn-outline"><i class="fa fa-trash-o"></i>&nbsp;删除</button>
+                    	</p>
+                        <div class="jqGrid_wrapper">
+                            <table id="table_list"></table>
+                            <div id="pager_list"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<!-- 全局js -->
+<include file="public:foot" />
+<!-- jqGrid -->
+<script src="__HPLUS__/js/plugins/jqgrid/i18n/grid.locale-cn.js?0820"></script>
+<script src="__HPLUS__/js/plugins/jqgrid/jquery.jqGrid.min.js?0820"></script>
+<script src="__HPLUS__/js/plugins/fancybox/jquery.fancybox.js"></script>
+<!-- Page-Level Scripts -->
+<script>
+$(document).ready(function () {
+	//图片全屏加载
+	$(".fancybox").fancybox({openEffect:"none",closeEffect:"none"});
+	//初始化
+    $.jgrid.defaults.styleUI = 'Bootstrap';
+	var sid = $("#sid").val();
+	switch (sid){
+		case '9' :
+            $("#table_list").jqGrid({
+                url : '__URL__/getAllData',
+                datatype: "json",
+                height: 580,
+                autowidth: true,
+                shrinkToFit: true,
+                rowNum: 15,
+                rowList: [10, 15, 30, 50],
+                colNames: ['ID','年级','班级','英方主教','中方助教','中方主教','班级人数'],
+                colModel: [ {name : 'id',index : 'id',hidden:true},
+                    {name : 'cats_name',index : 'cats_name'},
+                    {name : 'name',index : 'name'},
+                    {name : 'teacherName',index : 'teacherName'},
+                    {name : 'subTeacherName',index : 'subTeacherName'},
+                    {name : 'auntName',index : 'auntName'},
+                    {name : 'count',index : 'count'}
+                ],
+                pager: "#pager_list",
+                viewrecords: true,
+                hidegrid: false,
+                sortname: "id",
+                sortorder: "desc"
+            });
+		    break;
+		default:
+            $("#table_list").jqGrid({
+                url : '__URL__/getAllData',
+                datatype: "json",
+                height: 580,
+                autowidth: true,
+                shrinkToFit: true,
+                rowNum: 15,
+                rowList: [10, 15, 30, 50],
+                colNames: ['ID','年级','班级','班主任','任课老师','保育阿姨','班级人数'],
+                colModel: [ {name : 'id',index : 'id',hidden:true},
+                    {name : 'cats_name',index : 'cats_name'},
+                    {name : 'name',index : 'name'},
+                    {name : 'teacherName',index : 'teacherName'},
+                    {name : 'subTeacherName',index : 'subTeacherName'},
+                    {name : 'auntName',index : 'auntName'},
+                    {name : 'count',index : 'count'}
+                ],
+                pager: "#pager_list",
+                viewrecords: true,
+                hidegrid: false,
+                sortname: "id",
+                sortorder: "desc"
+            });
+	}
+
+ 	// 设置按钮
+    $("#table_list").jqGrid('navGrid', '#pager_list', {
+        edit: false,
+        add: false,
+        del: false,
+        search: false
+    }, {
+        height: 200,
+        reloadAfterSubmit: true
+    });
+    // 添加适配响应
+    $(window).bind('resize', function () {
+        var width = $('.jqGrid_wrapper').width();
+        $('#table_list').setGridWidth(width);
+    });
+  	//搜索
+    $(".btn-ibox-search").click(function() {
+    	result = getSearchParamByInput();
+    	$("#table_list").jqGrid('setGridParam', {
+    		page: 1,
+    		url : '__URL__/getAllData' + result
+    	}).trigger("reloadGrid");
+    })
+    //监控回车
+    $(".ibox-search-box").find(":input").keydown(function(event) {
+		if(event.keyCode == 13){
+			$(".btn-ibox-search").trigger("click");
+		}
+	})
+    //获取搜索条件（仅限封装简单条件）
+    function getSearchParamByInput() {
+    	var result = "";
+    	$(".ibox-search-box").find(":input").each(function() {
+    		if($(this).val() != "") {
+    			if(result != "") {
+    				result += "&";
+    			}else{
+    				result += "?";
+    			}
+    			result += $(this).attr("name") + "=" + $(this).val();
+    		}
+    	})
+    	return result;
+    }
+    
+    //增
+	$("#add").click(function() {
+		layerDialog("添加",'__URL__/add?type='+$("#type").val(),"90%","60%",true);
+	})
+	//改
+    $("#edit").click(function() {
+        var id = $("#table_list").jqGrid('getGridParam','selrow');
+        if(id != null) {
+            layerDialog("修改",'__URL__/edit?id='+id+'&type='+$("#type").val(),"90%","65%",true);
+        }else {
+            layer.msg("您没有选取数据！");
+        }
+    })
+	//删除
+    $("#del").click(function() {
+    	var id = $("#table_list").jqGrid('getGridParam','selrow');
+    	if(id != null) {
+    		layer.confirm('执行前请确定班级无在读学生，确认执行？', function(index){
+				$.ajax({
+					url:"__URL__/logicDel",
+					type:"post",
+					data:{'id':id},
+					success:function(data){
+						if(data.status == 1){
+							layer.msg(data.info);
+							$('#table_list').trigger("reloadGrid");
+						}else{
+							layer.msg(data.info);
+						}
+					}
+				})
+			    layer.close(index);
+			});
+    	}else {
+    		layer.msg("您没有选取数据！");
+    	}
+    })
+    //地址列表
+	$("#student").click(function() {
+		var id = $("#table_list").jqGrid('getGridParam','selrow');
+		if(id != null) {
+			layerDialog("学生列表",'__URL__/studentList?id='+id,"90%","80%",true);
+		}else {
+			layer.msg("您没有选取数据！");
+		}
+	})
+    //直播设备
+	$("#camera").click(function() {
+		var id = $("#table_list").jqGrid('getGridParam','selrow');
+		if(id != null) {
+			layerDialog("直播设备",'__URL__/camera?id='+id,"70%","40%",true);
+		}else {
+			layer.msg("您没有选取数据！");
+		}
+	})
+    //绑定老师
+	$("#teacher").click(function() {
+		var id = $("#table_list").jqGrid('getGridParam','selrow');
+		if(id != null) {
+			layerDialog("绑定老师",'__URL__/teacher?id='+id,"90%","80%",true);
+		}else {
+			layer.msg("您没有选取数据！");
+		}
+	})
+});
+
+function detail(id){
+	layerDialog("详细","__URL__/detailView?id="+id,"90%","90%",true)
+}
+</script>
+</html>

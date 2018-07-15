@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <include file="public:header" />
+</head>
+
+<body class="gray-bg">
+	<div class="wrapper wrapper-content">
+		<div class="row">
+			<div class="col-sm-12">
+		        <div class="ibox float-e-margins">
+					<div class="ibox-content">
+						<h5>欢迎你:<span style="color: red;">【<{:session("user_school_tel")}>】<{:session("user_school_realname")}>。</span></h5>
+						<h5>
+							【<{:session("schoolInfo")['name']}>】 <span style="color: red;"> 贵校的邀请码：<{:session("schoolInfo")['unique_code']}>，</span>
+							注册状态：
+							<eq name=":session('schoolInfo')['is_open']" value="1">
+								开放。
+								<button class="btn btn-success btn-xs btn-outline" onclick="updateStatus(2)"><i class="fa fa-cog"></i>  关闭注册</button>
+							<else/>
+								关闭。
+								<button class="btn btn-danger btn-xs btn-outline" onclick="updateStatus(1)"><i class="fa fa-cog"></i>  开启注册</button>
+							</eq>
+						</h5>
+						<p>现在是北京时间<{:date('Y-m-d H:i:s')}></p>
+						<br/>
+						<div class="alert alert-success">
+	                      	  为了获得更优体验，推荐使用火狐或Chrome等高级浏览器，
+	                        <a class="alert-link" href="http://www.firefox.com.cn/" target="_blank">点击下载!</a>
+	                    </div>
+					</div>
+		    	</div>
+			</div>
+		</div>
+	</div>
+</body>
+<!-- 全局js -->
+<include file="public:foot" />
+<script src="__HPLUS__/js/plugins/echarts/echarts.min.js"></script>
+<script type="text/javascript">
+function updateStatus(status){
+    layer.confirm('确定执行？', function(index){
+        var index = layer.load(2);
+        $.ajax({
+            url:"<{:url('Schools/update')}>",
+            type:"post",
+            data:{'id':<{:session('school_info_id')}>,'is_open':status},
+            success:function(data){
+                if(data.status == 1){
+                    layer.msg(data.info);
+                    window.location.reload();
+                }else{
+                    layer.msg(data.info);
+                }
+            }
+        })
+    });
+}
+</script>
+</html>

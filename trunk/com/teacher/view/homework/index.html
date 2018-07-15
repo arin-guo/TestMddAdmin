@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <include file="public:header" />
+    <!-- jqgrid-->
+    <link href="__HPLUS__/css/plugins/jqgrid/ui.jqgrid.css?0820" rel="stylesheet">
+    <!-- tree -->
+    <link href="__HPLUS__/css/plugins/treeview/bootstrap-treeview.css" rel="stylesheet">
+    <style type="text/css">
+   	.tree{min-height: 656px;}
+    </style>
+</head>
+
+<body class="gray-bg">
+    <div class="wrapper wrapper-content animated fadeInRight">
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="ibox ">
+                    <div class="ibox-content">
+                    	<div class="ibox-search-box">
+                    		<h3 class="pull-left">教师布置作业</h3>
+                    	</div>
+                    	<div class="ibox-search-box">
+                   			<div class="infont col-md-4">
+                                   <input type="text" name="title" class="form-control" placeholder="作业标题">
+                               </div>
+							<div class="infont col-md-4">
+                    			<button class="btn btn-success btn-block btn-ibox-search" type="button">搜索</button>
+                    		</div>
+                    	</div>
+                    	<div class="clearfix"></div>
+                    	<p>
+                    		<button type="button" id="add" class="btn btn-white btn-sm btn-outline"><i class="fa fa-plus-square-o"></i>&nbsp;新增</button>
+                    		<button type="button" id="edit" class="btn btn-white btn-sm btn-outline"><i class="fa fa-edit"></i>&nbsp;修改</button>
+                    		<button type="button" id="del" class="btn btn-white btn-sm btn-outline"><i class="fa fa-trash-o"></i>&nbsp;删除</button>
+                    	</p>
+                        <div class="jqGrid_wrapper">
+                            <table id="table_list"></table>
+                            <div id="pager_list"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="ibox ">
+                    <div class="ibox-content">
+                    	<div class="ibox-search-box">
+                    		<h3 class="pull-left">学生提交作业</h3>
+                    	</div>
+                    	<p>
+                    		<button type="button" id="editChildWork" class="btn btn-white btn-sm btn-outline"><i class="fa fa-edit"></i>&nbsp;批改</button>
+                    	</p>
+                    	 <div class="jqGrid_wrapper">
+                            <table id="child_table_list"></table>
+                            <div id="child_pager_list"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<!-- 全局js -->
+<include file="public:foot" />
+<!-- jqGrid -->
+<script src="__HPLUS__/js/plugins/jqgrid/i18n/grid.locale-cn.js?0820"></script>
+<script src="__HPLUS__/js/plugins/jqgrid/jquery.jqGrid.min.js?0820"></script>
+<!-- tree -->
+<script src="__HPLUS__/js/plugins/treeview/bootstrap-treeview.js"></script>
+<!-- Page-Level Scripts -->
+<script>
+$(document).ready(function () {
+	//初始化
+    $.jgrid.defaults.styleUI = 'Bootstrap';
+    $("#table_list").jqGrid({
+    	url : '__URL__/getAllData',
+    	datatype: "json",
+        height: 580,
+        autowidth: true,
+        shrinkToFit: true,
+        rowNum: 15,
+        rowList: [10, 15, 30, 50],
+        colNames: ['ID','作业标题','作业描述','创建时间','操作'],
+        colModel: [ {name : 'id',index : 'id',hidden:true},
+                    {name : 'title',index : 'title'},
+                    {name : 'content',index : 'content'},
+                    {name : 'create_time',index : 'create_time',formatter: 'date',formatoptions: {srcformat:'u',newformat:'Y-m-d H:i:s'}},
+                    {name : 'flag',index : 'flag',formatter : function(cellvalue, options, rowObject){
+                        var content ="";
+                        content = '<button class="btn btn-primary btn-xs btn-outline" onclick="detail('+rowObject.id+')"><i class="fa fa-building"></i>  详情</button>';
+                        return content;
+                    },sortable:false}
+                  ],
+        pager: "#pager_list",
+        viewrecords: true,
+        hidegrid: false,
+        sortname: "id",
+        sortorder: "desc",
+        onCellSelect: function(rowid) {
+           	if(rowid != null) {
+           		$("#child_table_list").jqGrid('setGridParam', { 
+            		url : '__URL__/getChildAllData?id=' + rowid
+            	}).trigger("reloadGrid");
+           	}else {
+           		layer.msg("您没有选取数据！");
+           	}
+        },
+    });
+    
+ 	// 设置按钮
+    $("#table_list").jqGrid('navGrid', '#pager_list', {
+        edit: false,
+        add: false,
+        del: false,
+        search: false
+    }, {
+        height: 200,
+        reloadAfterSubmit: true
+    });
+ 	// 添加适配响应
+    $(window).bind('resize', function () {
+        var width = $('.jqGrid_wrapper').width();
+        $('#table_list').setGridWidth(width);
+    });
+ 	//学生作业列表
+    $("#child_table_list").jqGrid({
+    	url : "__URL__/getChildAllData",
+    	datatype: "json",
+        height: 580,
+        autowidth: true,
+        shrinkToFit: true,
+        rowNum: 15,
+        rowList: [10, 15, 30, 50],
+        colNames: ['ID','学生姓名','状态','操作'],
+        colModel: [ {name : 'id',index : 'id',hidden:true},
+                    {name : 'realname',index : 'realname'},
+                    {name : 'status',index : 'status',formatter : function(cellvalue, options, rowObject){
+                    	var content = '';
+                    	if(cellvalue == '0'){
+                    		content = '<font color="red">未提交</font>';
+                    	}else if(cellvalue == '1'){
+                    		content = '<font color="blue">待批改</font>';
+                    	}else if(cellvalue == '2'){
+                    		content = '<font color="green">已批改</font>';
+                    	}else{
+                    		content = '状态错误'
+                    	}
+                    	return content;
+                    }},
+                    {name : 'status',index : 'status',formatter : function(cellvalue, options, rowObject){
+                        var content ="";
+                        content = '<button class="btn btn-primary btn-xs btn-outline" onclick="detailChild('+rowObject.id+')"><i class="fa fa-building"></i>  详情</button>';
+                        return content;
+                    },sortable:false}
+                  ],
+        pager: "#child_pager_list",
+        viewrecords: true,
+        hidegrid: false,
+        sortname: "id",
+        sortorder: "desc",
+    });
+ 	// 学生窗口设置按钮
+    $("#child_table_list").jqGrid('navGrid', '#pager_list2', {
+        edit: false,
+        add: false,
+        del: false,
+        search: false
+    }, {
+        height: 200,
+        reloadAfterSubmit: true
+    });
+ 	// 学生窗口添加适配响应
+    $(window).bind('resize', function () {
+        var width = $('.jqGrid_wrapper').width();
+        $('#child_table_list').setGridWidth(width);
+    });
+ 	 //搜索
+    $(".btn-ibox-search").click(function() {
+    	result = getSearchParamByInput();
+    	$("#table_list").jqGrid('setGridParam', {
+    		page: 1,
+    		url : '__URL__/getAllData' + result
+    	}).trigger("reloadGrid");
+    })
+     //监控回车
+    $(".ibox-search-box").find(":input").keydown(function(event) {
+		if(event.keyCode == 13){
+			$(".btn-ibox-search").trigger("click");
+		}
+	})
+	//获取搜索条件（仅限封装简单条件）
+    function getSearchParamByInput() {
+    	var result = "";
+    	$(".ibox-search-box").find(":input").each(function() {
+    		if($(this).val() != "") {
+    			if(result != "") {
+    				result += "&";
+    			}else{
+    				result += "?";
+    			}
+    			result += $(this).attr("name") + "=" + $(this).val();
+    		}
+    	})
+    	return result;
+    }
+  	//增
+	$("#add").click(function() {
+		layerDialog("添加",'__URL__/add?type='+$("#type").val(),"90%","70%",true);
+	})
+     //改
+    $("#edit").click(function() {
+        var id = $("#table_list").jqGrid('getGridParam','selrow');
+        if(id != null) {
+            layerDialog("修改",'__URL__/edit?id='+id+'&type='+$("#type").val(),"90%","65%",true);
+        }else {
+            layer.msg("您没有选取数据！");
+        }
+    })
+    //删除
+    $("#del").click(function() {
+    	var id = $("#table_list").jqGrid('getGridParam','selrow');
+    	if(id != null) {
+    		layer.confirm('确定执行？', function(index){
+				$.ajax({
+					url:"__URL__/logicDel",
+					type:"post",
+					data:{'id':id},
+					success:function(data){
+						if(data.status == 1){
+							layer.msg(data.info);
+							$('#table_list').trigger("reloadGrid");
+						}else{
+							layer.msg(data.info);
+						}
+					}
+				})
+			    layer.close(index);
+			});
+    	}else {
+    		layer.msg("您没有选取数据！");
+    	}
+    })
+	
+    //改（学生作业）
+    $("#editChildWork").click(function() {
+    	var id = $("#child_table_list").jqGrid('getGridParam','selrow');
+    	if(id != 0) {
+    		layerDialog("批改作业",'__URL__/editChildWork?id='+id,"90%","60%",true);
+    	}else {
+    		layer.msg("您没有选取数据！");
+    	}
+    })
+    //删除小类
+    $("#delChildWork").click(function() {
+    	var id = $("#subtype_id").val();
+    	if(id != 0) {
+    		layer.confirm('确定执行？', function(index){
+				$.ajax({
+					url:"__URL__/delSubType",
+					type:"post",
+					data:{'id':id},
+					success:function(data){
+						if(data.status == 1){
+							layer.msg(data.info);
+							var id = $("#table_list").jqGrid('getGridParam','selrow');
+							getTreeData(id);
+						}else{
+							layer.msg(data.info);
+						}
+					}
+				})
+			    layer.close(index);
+			});
+    	}else {
+    		layer.msg("您没有选取数据！");
+    	}
+    })
+    
+});
+function detail(id){
+	layerDialog("详细","__URL__/detailView?id="+id,"90%","90%",true)
+}
+function detailChild(id){
+	layerDialog("详细","__URL__/detailViewChild?id="+id,"90%","90%",true)
+}
+</script>
+</html>

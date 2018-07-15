@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<include file="public:header" />
+<link href="__HPLUS__/css/dialog.css" rel="stylesheet">
+<link href="__HPLUS__/css/plugins/validform/validform.css" rel="stylesheet">
+<!-- Data picker -->
+<link href="__HPLUS__/css/plugins/datapicker/datepicker3.css" rel="stylesheet">
+<style>
+.form-control{ padding-left:5px;}
+</style>
+  <body>
+	  <div class="wrapper wrapper-content animated fadeInRight">
+		<form role="form" class="form" action="__URL__/insert">
+			<input type="hidden" value="<{:session('school_info_id')}>" name="school_id"/>
+			<input type="hidden" name="flag" value="1">
+			<div class="form-group">
+				<label class="col-sm-2 control-label">学校名称：</label>
+				<div class="col-sm-10">
+					<select name="school_id" class="form-control"  placeholder="学校名称" datatype="*">
+						<option value=" ">请选择</option>
+						<foreach item="vo" name="vo">
+							<option value="<{$vo.id}>"><{$vo.name}></option>
+						</foreach>
+					</select>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">设备名称：</label>
+				<div class="col-sm-10">
+					<input type="text" datatype="*" name="device_name" class="form-control" placeholder="设备名称">
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">投放时间：</label>
+				<div class="col-sm-10 input-daterange">
+					<div class="col-sm-6">
+						<input type="text" name="use_time" datatype="*" class="form-control" readonly="readonly" placeholder="选择日期">
+					</div>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">设备规格：</label>
+				<div class="col-sm-10">
+					<input type="text" name="device_spec" class="form-control" placeholder="设备规格">
+				</div>
+			</div>
+			<div class="clearfix"></div><br/>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">设备描述：</label>
+				<div class="col-sm-10">
+					<input type="text" name="device_desc" class="form-control" placeholder="设备描述">
+				</div>
+			</div>
+			<div class="clearfix"></div><br/>
+			<div class="clearfix">
+				<button type="submit" id="submit" class="btn btn-success btn-block">提交</button>
+				<button type="reset" id="reset2" class="hidden btn btn-success btn-block">重置</button>
+			</div>
+		</form>
+	  </div>
+  </body>
+<!-- 全局js -->
+<include file="public:foot" />
+<script src="__HPLUS__/js/plugins/validform/Validform_v5.3.2_min.js"></script>
+<script src="__HPLUS__/js/jquery.md5.js"></script>
+<!-- Data picker -->
+<script src="__HPLUS__/js/plugins/datapicker/bootstrap-datepicker.js"></script>
+<script>
+$(function(){
+    //Data picker
+    $('.input-daterange').datepicker({
+        keyboardNavigation: false,
+        forceParse: false,
+        autoclose: true,
+        todayHighlight: true
+    });
+	$("#reset2").click();
+	var index = parent.layer.getFrameIndex(window.name);
+	var form = $(".form").Validform({
+		tiptype:4,
+		ajaxPost:true,
+		callback:function(data){
+			if(data.status == 1) {
+				window.parent.layer.msg(data.info);
+				window.parent.$('#table_list').trigger("reloadGrid");
+				parent.layer.close(index);
+			}else{
+				window.parent.layer.msg(data.info);
+			}
+		}
+	});
+})
+</script>
+</html>

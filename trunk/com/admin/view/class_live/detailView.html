@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<include file="public:header" />
+<link href="__HPLUS__/css/dialog.css" rel="stylesheet">
+<link href="__HPLUS__/js/plugins/fancybox/jquery.fancybox.css" rel="stylesheet">
+<style>
+.row .col-sm-4,.row .col-sm-12{ margin-top:15px;}
+</style>
+  <body class="gray-bg">
+	  <div class="wrapper wrapper-content animated fadeInRight">
+	  	<div class="ibox">
+            <div class="ibox-title">
+                <h5>基本信息</h5>
+            </div>
+            <div class="ibox-content">
+                <div class="row">
+                	<div class="col-sm-4">
+			  			学校名称：<{$vo.schoolName}>
+			  		</div>
+                	<div class="col-sm-4">
+			  			班级名称：<{$vo.className}>
+			  		</div>
+			  		<div class="col-sm-4">
+			  			设备名称：<{$vo.title}>
+			  		</div>
+			  		<div class="col-sm-4">
+			  			设备号：<{$vo.device_id}>
+			  		</div>
+			  		<div class="col-sm-4">
+			  			通道号：<{$vo.channel_id}>
+			  		</div>
+			  		<div class="col-sm-12">
+			  			视频封面：<{$vo.live_photo}>
+			  		</div>
+			  		<div class="col-sm-12">
+			  			直播地址：<{$vo.live_hls}>
+			  		</div>
+			  		<div class="col-sm-4">
+			  			直播token：<{$vo.live_token}>
+			  		</div>
+			  		<div class="col-sm-4">
+			  			状态：<font style="color:red;"><{:$vo['is_on']==1?"启用":"禁用"}></font>
+			  		</div>
+			  		<div class="col-sm-4">
+			  			是否开启声音：<font style="color:red;"><{:$vo['is_voice']==1?"启用":"禁用"}></font>
+			  		</div>
+			  		<div class="col-sm-4">
+			  			直播时间：<{$vo.open_time}> - <{$vo.close_time}>
+			  		</div>
+			  		<div class="col-sm-4">
+			  			创建时间：<{$vo.create_time|date="Y-m-d H:i:s",###}>
+			  		</div>
+			  		<div class="col-sm-4">
+			  			最后修改时间：<{$vo.update_time|date="Y-m-d H:i:s",###}>
+			  		</div>
+			  	</div>
+            </div>
+        </div>
+	  </div>
+  </body>
+<!-- 全局js -->
+<include file="public:foot" />
+<script src="__HPLUS__/js/plugins/fancybox/jquery.fancybox.js"></script>
+<script type="text/javascript">
+$(function(){
+	//图片全屏加载
+	$(".fancybox").fancybox({openEffect:"none",closeEffect:"none"});
+})
+</script>
+</html>

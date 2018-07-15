@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <include file="public:header" />
+    <!-- jqgrid-->
+    <link href="__HPLUS__/css/plugins/jqgrid/ui.jqgrid.css?0820" rel="stylesheet">
+</head>
+
+<body class="gray-bg">
+    <div class="wrapper wrapper-content  animated fadeInRight">
+    	<input id="id" class="hide" value="<{$id}>"/>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="ibox ">
+                    <div class="ibox-content">
+                        <p>
+                            <button type="button" id="addfix" class="btn btn-white btn-sm btn-outline"><i class="fa fa-plus-square-o"></i>&nbsp;新增维修记录</button>
+                            <button type="button" id="editfix" class="btn btn-white btn-sm btn-outline"><i class="fa fa-edit"></i>&nbsp;修改维修记录</button>
+                        </p>
+                        <div class="jqGrid_wrapper">
+                            <table id="table_list"></table>
+                            <div id="pager_list"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<!-- 全局js -->
+<include file="public:foot" />
+<!-- jqGrid -->
+<script src="__HPLUS__/js/plugins/jqgrid/i18n/grid.locale-cn.js?0820"></script>
+<script src="__HPLUS__/js/plugins/jqgrid/jquery.jqGrid.min.js?0820"></script>
+<!-- Page-Level Scripts -->
+<script>
+$(document).ready(function () {
+	//初始化
+    $.jgrid.defaults.styleUI = 'Bootstrap';
+    $("#table_list").jqGrid({
+    	url : '__URL__/getAllFixData?id=' + $("#id").val(),
+        datatype: "json",
+        height: 450,
+        autowidth: true,
+        shrinkToFit: true,
+        rowNum: 15,
+        rowList: [10, 15, 30, 50],
+        colNames : [ 'ID','设备名称', '修理时间','修理记录','操作'],
+        colModel : [ {name : 'id',index : 'id'},
+				     {name : 'device_name',index : 'device_name'},
+				     {name : 'fix_time',index : 'fix_time'},
+				     {name : 'fix_notes',index : 'fix_notes'},
+			         {name : 'flag',index : 'flag',formatter : function(cellvalue, options, rowObject){
+			        	content='<button class="btn btn-danger btn-xs btn-outline" onclick="del('+rowObject.id+')"><i class="fa fa-trash"></i>  删除</button>';;
+                       	return content;
+                	 }}
+                   ],
+        pager: "#pager_list",
+        viewrecords: true,
+        hidegrid: false,
+        sortname: "id",
+        sortorder: "desc",
+    });
+ 	// 设置按钮
+    $("#table_list").jqGrid('navGrid', '#pager_list', {
+        edit: false,
+        add: false,
+        del: false,
+        search: false
+    }, {
+        height: 200,
+        reloadAfterSubmit: true
+    });
+    // 添加适配响应
+    $(window).bind('resize', function () {
+        var width = $('.jqGrid_wrapper').width();
+        $('#table_list').setGridWidth(width);
+    });
+    //新增维修记录
+    $("#addfix").click(function() {
+        var id = $("#id").val();
+        layerDialog("添加维修记录",'__URL__/addfix?id='+id+'&type='+$("#type").val(),"90%","90%",true);
+    });
+    //修改维修记录
+    $("#editfix").click(function() {
+        var did = $("#id").val();
+        var id = $("#table_list").jqGrid('getGridParam','selrow');
+        if(id != null) {
+            layerDialog("修改",'__URL__/editfix?id='+id+'&did='+did+'&type='+$("#type").val(),"90%","90%",true);
+        }else {
+            layer.msg("您没有选取数据！");
+        }
+    })
+});
+//删除维修记录
+function del(id){
+    layer.confirm('确定删除？', function(index){
+        var index = layer.load(2);
+        $.ajax({
+            url:"__URL__/fixLogicDel",
+            type:"post",
+            data:{'id':id},
+            success:function(data){
+                if(data.status == 1){
+                    layer.msg(data.info);
+                    $('#table_list').trigger("reloadGrid");
+                }else{
+                    layer.msg(data.info);
+                }
+                layer.close(index);
+            }
+        })
+    });
+}
+</script>
+</html>

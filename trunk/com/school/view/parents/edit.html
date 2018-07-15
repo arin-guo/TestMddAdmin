@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<include file="public:header" />
+<link href="__HPLUS__/css/dialog.css" rel="stylesheet">
+<link href="__HPLUS__/css/plugins/validform/validform.css" rel="stylesheet">
+<style>
+	.form-control{ padding-left:5px;}
+</style>
+<body>
+<div class="wrapper wrapper-content animated fadeInRight">
+	<form role="form" class="form" action="__URL__/update">
+		<input type="hidden" name="id" value="<{$vo.id}>">
+		<div class="form-group">
+			<label class="col-sm-2 control-label">家长姓名：</label>
+			<div class="col-sm-10">
+				<input type="text" name="realname" class="form-control" placeholder="" value="<{$vo.realname}>" >
+			</div>
+		</div>
+		<div class="clearfix"></div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">手机号：</label>
+			<div class="col-sm-10">
+				<input type="text" name="tel" datatype="*" ajaxurl="__URL__/checkValueAll?type=1&id=<{$vo.id}>" class="form-control" placeholder="" value="<{$vo.tel}>" >
+			</div>
+		</div>
+		<div class="clearfix"></div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">性别：</label>
+			<div class="col-sm-10">
+				<select name="sex" class="form-control" datatype="*">
+					<option value="">请选择</option>
+					<option value="1" <if condition="$vo.sex eq 1"> selected</if> >男</option>
+					<option value="2" <if condition="$vo.sex eq 2"> selected</if> >女</option>
+				</select>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">身份证(选填)：</label>
+			<div class="col-sm-10">
+				<input type="text" datatype="/^(^[1-9]\d{7}((0\d)|(1[0-2]))(([0|1|2]\d)|3[0-1])\d{3}$)|(^[1-9]\d{5}[1-9]\d{3}((0\d)|(1[0-2]))(([0|1|2]\d)|3[0-1])((\d{4})|\d{3}[Xx])$)$/" ignore="ignore" name="id_card" errormsg="身份证格式不正确" class="form-control" placeholder="身份证号码" ajaxurl="__URL__/checkValue?type=1&id=<{$vo.id}>" value="<{$vo.id_card}>">
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">家庭住址(选填)：</label>
+			<div class="col-sm-10">
+				<input type="text" name="address" class="form-control"  placeholder="输入地址" value="<{$vo.address}>">
+			</div>
+		</div>
+		<div class="clearfix"></div><br/>
+
+		<div class="clearfix">
+			<button type="submit" id="submit" class="btn btn-success btn-block">提交</button>
+			<button type="reset" id="reset2" class="hidden btn btn-success btn-block">重置</button>
+		</div>
+	</form>
+</div>
+</body>
+<!-- 全局js -->
+<include file="public:foot" />
+<script src="__HPLUS__/js/plugins/validform/Validform_v5.3.2_min.js"></script>
+<script src="__HPLUS__/js/jquery.md5.js"></script>
+<script>
+    $(function(){
+        $("#reset2").click();
+        var index = parent.layer.getFrameIndex(window.name);
+        var form = $(".form").Validform({
+            tiptype:4,
+            ajaxPost:true,
+            callback:function(data){
+                if(data.status == 1) {
+                    window.parent.layer.msg(data.info);
+                    window.parent.$('#table_list').trigger("reloadGrid");
+                    parent.layer.close(index);
+                }else{
+                    window.parent.layer.msg(data.info);
+                }
+            }
+        });
+    })
+</script>
+</html>

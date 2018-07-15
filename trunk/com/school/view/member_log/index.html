@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+<include file="public:header" />
+<!-- jqgrid-->
+<link href="__HPLUS__/css/plugins/jqgrid/ui.jqgrid.css?0820" rel="stylesheet">
+</head>
+
+<body class="gray-bg">
+    <div class="wrapper wrapper-content animated fadeInRight">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="ibox ">
+                    <div class="ibox-content">
+                    	<p>
+                    		<button type="button" id="del" class="btn btn-white btn-sm btn-outline"><i class="fa fa-del"></i>&nbsp;删除</button>
+                    		<!-- <button type="button" id="delAll" class="btn btn-white btn-sm btn-outline"><i class="fa fa-del"></i>&nbsp;清空全部</button> -->
+                    	</p>
+                        <div class="jqGrid_wrapper">
+                            <table id="table_list"></table>
+                            <div id="pager_list"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<!-- 全局js -->
+<include file="public:foot" />
+<!-- jqGrid -->
+<script src="__HPLUS__/js/plugins/jqgrid/i18n/grid.locale-cn.js?0820"></script>
+<script src="__HPLUS__/js/plugins/jqgrid/jquery.jqGrid.min.js?0820"></script>
+<!-- Page-Level Scripts -->
+<script>
+$(document).ready(function () {
+	//初始化
+    $.jgrid.defaults.styleUI = 'Bootstrap';
+    $("#table_list").jqGrid({
+    	url : '__URL__/getAllData',
+        datatype: "json",
+        height: 640,
+        autowidth: true,
+        shrinkToFit: true,
+        rowNum: 15,
+        rowList: [10, 15, 30, 50],
+        colNames : [ 'id', '操作用户', '行为', '触发菜单' ,'触发url', '操作IP','时间'],
+        colModel : [ {name : 'id',index : 'id'},
+                     {name : 'username',index : 'username',formatter : function(cellvalue, options, rowObject){
+                    	 	return rowObject.realname+"["+cellvalue+"]";
+               	 	 }},
+                     {name : 'behavior',index : 'behavior'},
+                     {name : 'title',index : 'title'},
+                     {name : 'url',index : 'url'},
+                     {name : 'userip',index : 'userip'},
+                 	 {name : 'create_time',index : 'create_time',formatter: 'date',formatoptions: {srcformat:'u',newformat:'Y-m-d H:i:s'}}
+                   ],
+        pager: "#pager_list",
+        viewrecords: true,
+        hidegrid: false,
+        sortname: "id",
+        sortorder: "desc",
+        multiselect : true
+    });
+
+ 	// 设置按钮
+    $("#table_list").jqGrid('navGrid', '#pager_list', {
+        edit: false,
+        add: false,
+        del: false,
+        search: false
+    }, {
+        height: 200,
+        reloadAfterSubmit: true
+    }).navButtonAdd('#pager_list',{
+ 	    caption:"导出", 
+	    title:"导出",
+	    buttonicon:"fa fa-file-excel-o",   
+	    onClickButton: function(){   
+		   result = getSearchParamByInput();
+		   var url = "__URL__/outCsv"+result;
+		   var iframe = document.createElement("iframe");
+		   iframe.src = url;
+		   iframe.style.display = 'none';
+		   document.body.appendChild(iframe);
+		   layer.msg("正在导出，请稍后...");
+	    },
+	    position:"last"  
+	});;
+    // 添加适配响应
+    $(window).bind('resize', function () {
+        var width = $('.jqGrid_wrapper').width();
+        $('#table_list').setGridWidth(width);
+    });
+  	//搜索
+    $(".btn-ibox-search").click(function() {
+    	result = getSearchParamByInput();
+    	$("#table_list").jqGrid('setGridParam', {
+    		page: 1,
+    		url : '__URL__/getAllData' + result
+    	}).trigger("reloadGrid");
+    })
+    //监控回车
+    $(".ibox-search-box").find(":input").keydown(function(event) {
+		if(event.keyCode == 13){
+			$(".btn-ibox-search").trigger("click");
+		}
+	})
+    
+    //获取搜索条件（仅限封装简单条件）
+    function getSearchParamByInput() {
+    	var result = "";
+    	$(".ibox-search-box").find(":input").each(function() {
+    		if($(this).val() != "") {
+    			if(result != "") {
+    				result += "&";
+    			}else{
+    				result += "?";
+    			}
+    			result += $(this).attr("name") + "=" + $(this).val();
+    		}
+    	})
+    	return result;
+    }
+  //删除
+    $("#del").click(function() {
+    	var ids = $("#table_list").jqGrid('getGridParam', 'selarrrow');
+    	ids = ids.toString();
+    	if(ids != "") {
+    		layer.confirm('确定执行？', function(index){
+        		$.ajax({
+        			url:"__URL__/del",
+        			type:"post",
+        			data:{'id':ids},
+        			success:function(data){
+        				if(data.status == 1){
+        					layer.msg(data.info);
+        					$('#table_list').trigger("reloadGrid");
+        				}else{
+        					layer.msg(data.info);
+        				}
+        			}
+        		})
+        	});
+    	}else {
+    		layer.msg("您没有选取数据！");
+    	}
+    })
+    //删除所有
+    $("#delAll").click(function() {
+    	layer.confirm('删除后不可恢复，确定执行？', function(index){
+       		$.ajax({
+       			url:"__URL__/delAll",
+       			type:"post",
+       			data:{'id':'0'},
+       			success:function(data){
+       				if(data.status == 1){
+       					layer.msg(data.info);
+       					$('#table_list').trigger("reloadGrid");
+       				}else{
+       					layer.msg(data.info);
+       				}
+       			}
+       		})
+       	});
+    })
+});
+</script>
+</html>

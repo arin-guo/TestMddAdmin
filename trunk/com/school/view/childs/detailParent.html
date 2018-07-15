@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<include file="public:header" />
+<link href="__HPLUS__/css/dialog.css" rel="stylesheet">
+<link href="__HPLUS__/js/plugins/fancybox/jquery.fancybox.css" rel="stylesheet">
+<style>
+.row .col-sm-4,.row .col-sm-12{ margin-top:15px;}
+</style>
+  <body class="gray-bg">
+	  <div class="wrapper wrapper-content animated fadeInRight">
+	  	<div class="ibox">
+            <div class="ibox-title">
+                <h5>家长信息</h5>
+            </div>
+            <div class="ibox-content">
+            	<foreach name="vo" item="pinfo">
+	                <div class="row">
+	                	<div class="col-sm-4">
+				  			姓名：<{$pinfo.realname}>
+				  		</div>
+				  		<div class="col-sm-4">
+				  			手机号：<{$pinfo.tel}>
+				  		</div>
+				  		<div class="col-sm-4">
+				  			身份证：<{$pinfo.id_card}>
+				  		</div>
+				  		<div class="col-sm-4">
+				  			关系：<{$pinfo.relation}>
+				  		</div>
+				  		<div class="col-sm-4">
+				  			性别：<{$pinfo.sex == 1?"男":"女"}>
+				  		</div>
+				  		<div class="col-sm-4">
+				  			地址：<{$pinfo.address}>
+				  		</div>
+				  		<if condition="$pinfo.type eq 1">
+					  		<div class="col-sm-4">
+					  			<font color="blue">类别：</font>主家长
+					  		</div>
+				  		<elseif condition="$pinfo.type eq 2">
+				  			<div class="col-sm-4">
+					  			<font color="blue">类别：</font>从属家长
+					  		</div>
+					  	<else />
+					  	</if>
+				  	</div>
+				  	<div class="clearfix"></div><br>
+			  	</foreach>
+            </div>
+        </div>
+	  </div>
+  </body>
+<!-- 全局js -->
+<include file="public:foot" />
+<script src="__HPLUS__/js/plugins/fancybox/jquery.fancybox.js"></script>
+<script type="text/javascript">
+$(function(){
+	//图片全屏加载
+	$(".fancybox").fancybox({openEffect:"none",closeEffect:"none"});
+})
+</script>
+</html>

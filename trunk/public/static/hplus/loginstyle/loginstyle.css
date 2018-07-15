@@ -1,0 +1,84 @@
+/*中间内容背景图*/
+.middle-content{
+    width:100%;
+    height:830px;
+}
+/*顶部菜单样式*/
+.top-menu{
+    width:100%;
+    height: 80px;
+}
+.menu-list{
+    list-style: none;
+}
+.menu-list li{
+    float:left;
+    font-size: 16px;
+    line-height: 5;
+    width: 20%;
+}
+.topmenu-button a{
+    text-decoration:none;
+    color: black;
+}
+.down-block{
+    text-align: center;
+}
+.topmenu-login{
+    background-color: #FFC400;
+    float: right;
+    width: 152px;
+    text-align: center;
+}
+.toplogin-block{
+    font-size: 15px;
+    line-height: 5.5;
+    color: white;
+    height: 80px;
+}
+.toplogin-block span a{
+    margin:0 5px;
+    text-decoration: none;
+    color: white;
+}
+/*中部手机图片*/
+.mobile-phone{
+    margin-top: 80px;
+}
+/*修改登录框样式*/
+.m-t .form-group input{
+    border-radius:12px;
+}
+.m-t button{
+    border-radius:12px;
+    background-color: #FFC400;
+    border:1px solid #FFC400
+}
+.middle-box .login-box{
+    padding: 20px 20px 11px;
+    border-radius:12px;
+    background-color: white;
+}
+.middle-box{
+    margin-top: 100px;
+}
+/*底部内容*/
+.bottom-content{
+    width:100%;
+    height: 200px;
+    background-color: #2E446D;
+}
+.bottom-content div .bottom-logo{
+    margin-top: 50px;
+}
+.address-info{
+    margin-top: 40px;
+}
+.address-info div{
+    margin: 15px 0;
+}
+.address-info div span{
+    color:white;
+    font-size: 15px;
+    margin-left:10px
+}

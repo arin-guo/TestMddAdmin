@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<include file="public:header" />
+<link href="__HPLUS__/css/dialog.css" rel="stylesheet">
+<link href="__HPLUS__/css/plugins/validform/validform.css" rel="stylesheet">
+<style>
+	.form-control{ padding-left:5px;}
+</style>
+  <body>
+	  <div class="wrapper wrapper-content animated fadeInRight">
+		<form role="form" class="form" action="__URL__/updatePwd">
+			<input type="hidden" name="id" value="<{:session('user_teacher_id')}>">
+			<input type="hidden" id="pwd" name="password" value="">
+			<input type="hidden" id="oldpwd" name="oldpassword" value="">
+			<div class="form-group">
+				<label class="col-sm-2 control-label">用户名：</label>
+				<div class="col-sm-10">
+					<input type="text" disabled class="form-control" placeholder="账户" value="<{:session('user_teacher_tel')}>">
+				</div>
+			</div>
+			<div class="clearfix"></div>
+			<br/>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">旧密码：</label>
+				<div class="col-sm-10">
+					<input type="password" datatype="s6-20" errormsg="至少6个字符,最多20个字符！" class="form-control oldpwd" placeholder="旧密码">
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">新密码：</label>
+				<div class="col-sm-10">
+					<input type="password" datatype="s6-20" errormsg="至少6个字符,最多20个字符！" class="form-control pwd" placeholder="新密码" name="old">
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">确认新密码：</label>
+				<div class="col-sm-10">
+					<input type="password" datatype="s6-20" recheck="old" class="form-control" placeholder="确认新密码">
+				</div>
+			</div>
+			<div class="clearfix"></div>
+			<br/>
+			<div class="clearfix">
+				<button type="submit" id="submit" class="btn btn-success btn-block">提交</button>
+				<button type="reset" id="reset2" class="hidden btn btn-success btn-block">重置</button>
+			</div>
+		</form>
+	  </div>
+  </body>
+<!-- 全局js -->
+<include file="public:foot" />
+<script src="__HPLUS__/js/plugins/validform/Validform_v5.3.2_min.js"></script>
+<script src="__HPLUS__/js/jquery.md5.js"></script>
+<script>
+$(function(){
+	$("#reset2").click();
+	var index = parent.layer.getFrameIndex(window.name);
+	var form = $(".form").Validform({
+		tiptype:4,
+		ajaxPost:true,
+		beforeSubmit:function(curform){
+			$("#pwd").val($.md5($(".pwd").val()));
+			$("#oldpwd").val($.md5($(".oldpwd").val()));
+		},
+		callback:function(data){
+			if(data.status == 1) {
+				window.parent.layer.msg(data.info);
+				window.parent.location.href = "<{:url('Login/index')}>";
+				parent.layer.close(index);
+			}else{
+				window.parent.layer.msg(data.info);
+			}
+		}
+	});
+})
+</script>
+</html>
